@@ -1,0 +1,151 @@
+.cm-container {
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+  }
+  
+  .cm-filter-bar {
+    margin-bottom: 1rem;
+  }
+  
+  .cm-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+  }
+  
+  .cm-table th,
+  .cm-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .cm-table th {
+    background-color: var(--footer-bg);
+    color: var(--input-text);
+  }
+  
+  /* Name buttons */
+  .cm-link-button {
+    background: none;
+    border: none;
+    color: var(--input-text);
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+    font-size: 17px;
+    transition: color 0.2s;
+  }
+  
+  .cm-link-button:hover {
+    color: var(--accent);
+    text-decoration: wavy;
+  }
+  
+  /* Status styling */
+  .cm-status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: inline-block;
+  }
+  
+  .cm-status.pending {
+    background-color: orange;
+  }
+  
+  .cm-status.approved {
+    background-color: green;
+  }
+  
+  .cm-status.declined {
+    background-color: red;
+  }
+  
+  /* Modal */
+  .cm-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .cm-modal {
+    background: var(--footer-bg);
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  .cm-docs img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 0.5rem;
+    border: 1px solid #ccc;
+  }
+  
+  .cm-samples {
+    display: flex;
+    gap: 10px;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .cm-modal-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .cm-approve {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .cm-decline {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .cm-analytics {
+    background-color: #2196f3;
+    color: white;
+  }
+  
+  /* Make remove button red */
+  .cm-remove {
+    background-color: #d32f2f;
+    color: white;
+  }
+  
+  /* Center the close button */
+  .cm-close-btn {
+    margin: 2rem auto 0;
+    background-color: var(--accent);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    display: block;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .cm-close-btn:hover {
+    background-color: var(--input-text);
+    color: var(--footer-bg);
+  }
+  

@@ -1,0 +1,121 @@
+.booking-management {
+    padding: 1.5rem;
+  }
+  
+  .booking-management h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .search-input {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .booking-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .booking-table th,
+  .booking-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .booking-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .booking-table button {
+    margin-right: 0.5rem;
+    padding: 0.4rem 0.7rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .booking-table .delete-btn {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .booking-table button:not(.delete-btn) {
+    background-color: #3498db;
+    color: white;
+  }
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Dimmed backdrop */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal {
+    background: var(--bg-color); /* Custom theming */
+    color: var(--text-color, #333); /* Fallback for text color */
+    padding: 24px;
+    width: 60%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.2s ease-in-out;
+  }
+  
+  .modal h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+  
+  .modal p {
+    margin: 8px 0;
+    line-height: 1.5;
+  }
+  
+  .modal-actions {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+  
+  .modal button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: var(--primary-color, #3498db);
+    color: #fff;
+    font-weight: 500;
+    transition: background 0.2s ease-in-out;
+  }
+  
+  .modal button:hover {
+    background: var(--primary-color-dark, #2980b9);
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

@@ -1,0 +1,146 @@
+.footer-extended {
+    background-color: var(--footer-bg);
+    color: var(--footer-text);
+    padding: 40px 20px 20px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  .footer-container {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 30px;
+  }
+  
+  .footer-logo {
+    flex: 1 1 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .footer-logo img {
+    width: 150px;
+    margin-bottom: 10px;
+  }
+  
+  .footer-logo p {
+    margin-top: 0;
+    color: var(--footer-text);
+  }
+  
+  .footer-columns {
+    display: flex;
+    flex: 3;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  
+  .footer-column {
+    flex: 1 1 150px;
+  }
+  
+  .footer-column h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: var(--footer-text);
+  }
+  
+  .footer-column ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .footer-column ul li {
+    margin-bottom: 8px;
+  }
+  
+  .footer-column ul li a {
+    color: var(--footer-link);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  
+  .footer-column ul li a:hover {
+    color: var(--footer-link-hover);
+  }
+  
+  .footer-bottom {
+    text-align: center;
+    border-top: 1px solid var(--footer-divider);
+    margin-top: 30px;
+    padding-top: 20px;
+    color: var(--footer-link);
+    font-size: 12px;
+  }
+  
+  .footer-bottom a {
+    color: var(--footer-link);
+    text-decoration: none;
+    margin-left: 5px;
+  }
+  
+  .footer-bottom a:hover {
+    text-decoration: underline;
+  }
+  @media (max-width: 768px) {
+    .footer-container {
+      flex-wrap: wrap;
+      flex-direction: row;
+      justify-content: center;
+      gap: 20px;
+    }
+  
+    .footer-logo {
+      flex: 1 1 100%;
+      max-width: 100%;
+      align-items: center;
+      text-align: center;
+    }
+  
+    .footer-logo img {
+      width: 100px; /* smaller logo on mobile */
+      margin-bottom: 5px;
+    }
+  
+    .footer-columns {
+      flex: 1 1 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+  
+    .footer-column {
+      flex: 1 1 45%; /* two columns per row */
+      text-align: center;
+    }
+  
+    .footer-bottom {
+      font-size: 12px;
+      padding: 10px 0;
+    }
+  }
+  .theme-toggle {
+    background: none;
+    border: none;
+    color: var(--footer-link);
+    cursor: pointer;
+    display: flex;
+
+    transition: color 0.3s ease;
+  }
+  
+  .theme-toggle:hover {
+    color: var(--accent);
+  }
+  .footer-column .theme-toggle {
+    justify-content: center;
+    font-size: 16px;
+  }
+  

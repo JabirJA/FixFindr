@@ -1,0 +1,29 @@
+/* Dashboard.css */
+
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  
+  .dashboard-main {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    transition: margin-left 0.3s ease;
+  }
+  
+
+  
+  /* Show toggle on smaller screens */
+  @media (max-width: 768px) {
+   
+
+    .dashboard-main {
+      margin-left: 0;
+      padding: 10px;
+    }
+  }
+  

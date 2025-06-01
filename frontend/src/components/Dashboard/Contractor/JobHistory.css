@@ -1,0 +1,29 @@
+.job-history-container {
+    padding: 20px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+
+
+  .job-history-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .job-history-table th,
+  .job-history-table td {
+    border: 1px solid var(--bg-color);
+    padding: 12px;
+    color: var(--text-color);;
+    text-align: left;
+  }
+  
+  .job-history-table th {
+    color: var(--bg-color);
+    background-color: var(--text-color);
+  }
+  
+  .job-history-table tbody tr:hover {
+    background-color: var(--footer-link);
+  }
+  

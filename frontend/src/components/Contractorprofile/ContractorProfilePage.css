@@ -1,0 +1,310 @@
+.contractor-profile-container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 15px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--input-text);
+  background-color: var(--bg);
+}
+
+.contractor-main-card {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.contractorimage {
+  flex: 1 1 auto;
+  max-width: 400px;
+  width: 100%;
+  height: auto;
+  border-radius: 15px;
+  object-fit: contain;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.contractor-info {
+  flex: 2 1 500px;
+  min-width: 300px;
+  box-shadow: var(--testimonial-shadow)
+}
+
+.contractor-info .contractor-name {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--input-text);
+}
+
+.contractor-services-summary {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #4a4a4a;
+  margin-bottom: 10px;
+}
+
+.rating {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #f39c12; /* gold star color */
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-start;
+}
+
+.star {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.rating-number {
+  color: var(--input-text);
+  font-weight: 700;
+  margin-left: 6px;
+  font-size: 1rem;
+}
+
+.about-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.about-section .intro, .experience, .lang{
+  margin-bottom: 0;
+  color: #555;
+
+}
+
+.services-list {
+  list-style-type: disc;
+  padding-left: 20px;
+  color: var(--input-text)
+}
+
+.services-list li {
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.availability-heading {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+}
+
+.availability-center {
+  display: flex;
+  justify-content: left;
+  margin-bottom: 20px;
+}
+
+.distance-info {
+  text-align: center;
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.booking-heading {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 30px;
+  margin-bottom: 20px;
+}
+
+.availability-dropdown {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 100%;
+  max-width: 320px;
+  cursor: pointer;
+}
+
+.available {
+  color: #27ae60;
+  font-weight: 700;
+}
+
+.unavailable {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.contact-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: nowrap;
+}
+
+.btn {
+  padding: 12px 25px;
+  font-size: 1.1rem;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  min-width: 130px;
+  text-align: center;
+}
+
+.chat-btn {
+
+  background-color:  #27ae60;
+  color: white;
+}
+
+.chat-btn:hover {
+  background-color: #2471a3;
+}
+
+
+.book-btn {
+  background-color: var(--accent);
+  color: white;
+  display: block;
+  margin: 0 auto 0px auto;
+  width: 400px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.book-btn:hover {
+  background-color: #005fcc;
+}
+
+.gallery-section, .reviews-section, .map-section {
+  margin-bottom: 40px;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 15px;
+}
+
+.gallery img {
+  width: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+  height: 200px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.gallery img:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.review {
+  border-bottom: 0.5px solid var(--input-text);
+  padding: 15px 0;
+  font-size: 1rem;
+  background-color: var(--bg);
+}
+
+.review-rating {
+  color: #f39c12;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+.map-iframe {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  margin-top: 15px;
+  min-height: 300px;
+}
+
+.not-found {
+  font-size: 1.8rem;
+  text-align: center;
+  margin-top: 100px;
+  color: #999;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .contractor-main-card {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .contractorimage {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .contractor-info {
+    width: 100%;
+  }
+
+  .book-btn {
+    width: 80%;
+  }
+  .contact-buttons {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+
+  }
+  .gallery {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .gallery img {
+    flex: 0 0 auto;
+    width: 250px;
+    height: 180px;
+    scroll-snap-align: start;
+  }
+
+
+.availability-center {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+}
+@media (max-width: 768px) {
+  .contractor-info .contractor-name {
+    font-size: 1.8rem;
+  }
+
+  .contractor-services-summary,
+  .rating,
+  .intro,
+  .distance-info {
+    font-size: 1rem;
+  }
+
+  .availability-heading,
+  .booking-heading,
+  .contact-heading {
+    font-size: 1.3rem;
+  }
+
+  .book-btn {
+    font-size: 1rem;
+  }
+}

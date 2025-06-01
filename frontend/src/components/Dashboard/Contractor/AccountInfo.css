@@ -1,0 +1,214 @@
+:root {
+    --bg-light: #f9fafb;
+    --text-light: #2c3e50;
+    --bg-dark: #121212;
+    --text-dark: #e0e0e0;
+    --primary: #4a90e2;
+    --primary-hover: #357ABD;
+    --input-border: #ccc;
+    --input-border-focus: var(--primary);
+    --error-color: #e74c3c;
+    --status-verified: #27ae60;
+    --status-pending: #f39c12;
+    --status-unverified: #c0392b;
+  }
+  
+  .kyc-container {
+    max-width: 1000px;
+    margin: 2.5rem auto;
+    padding: 2rem;
+    border-radius: 12px;
+    background-color: var(--bg-light);
+    color: var(--text-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  [data-theme="dark"] .kyc-container {
+    background-color: var(--bg-dark);
+    color: var(--text-dark);
+  }
+  
+  .intro-message,
+  .verification-message {
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    color: var(--text-light);
+  }
+  
+  [data-theme="dark"] .intro-message,
+  [data-theme="dark"] .verification-message {
+    color: var(--text-dark);
+  }
+  
+  .status {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .status-label {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.4em 1em;
+    border-radius: 8px;
+    color: white;
+    margin-top: 0.5rem;
+    text-transform: capitalize;
+  }
+  
+  .status-label.verified {
+    background-color: var(--status-verified);
+  }
+  .status-label.pending {
+    background-color: var(--status-pending);
+  }
+  .status-label.unverified {
+    background-color: var(--status-unverified);
+  }
+  
+  .kyc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  
+  .kyc-form label {
+    font-weight: 600;
+    font-size: 0.98rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  
+  .kyc-form input,
+  .kyc-form select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-light);
+    background-color: white;
+
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    outline-offset: 2px;
+  }
+  
+  .kyc-form input:focus,
+  .kyc-form select:focus {
+    border-color: var(--input-border-focus);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+    outline: none;
+  }
+  
+  [data-theme="dark"] .kyc-form input,
+  [data-theme="dark"] .kyc-form select {
+    background-color: #1e1e1e;
+    color: var(--text-dark);
+    border: 2px solid #333;
+  }
+  
+  .error {
+    font-size: 0.85rem;
+    color: var(--error-color);
+    font-weight: 600;
+    margin-top: -0.5rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: inherit;
+    user-select: none;
+  }
+  
+  .checkbox-field input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  
+  .submit-buttonu {
+    margin-top: 1rem;
+    display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  }
+  
+ 
+  @media (max-width: 768px) {
+    .kyc-container {
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+  
+    .submit-buttonu {
+      font-size: 1rem;
+      padding: 0.8rem 1rem;
+    }
+  
+    .status {
+      font-size: 1rem;
+    }
+  
+    .status-label {
+      font-size: 0.9rem;
+      padding: 0.35em 0.8em;
+    }
+  
+    .intro-message,
+    .verification-message {
+      font-size: 0.95rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .kyc-form input,
+    .kyc-form select {
+      font-size: 0.95rem;
+      padding: 0.65rem 0.9rem;
+    }
+  
+    .submit-buttonu {
+      font-size: 0.95rem;
+    }
+  
+    .kyc-form label {
+      font-size: 0.9rem;
+    }
+  }
+  .preview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .preview-thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #ccc;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  
+  .preview-thumbnail:hover {
+    transform: scale(1.05);
+    border-color: #007bff;
+  }
+  .declaration {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }

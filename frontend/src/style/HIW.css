@@ -1,0 +1,27 @@
+
+ 
+  .container.how-it-works-page {
+    max-width: 900px;
+
+  }
+  
+  .how-it-works-page > p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    color: var(--secondary-text-color);
+    text-align: center;
+  }
+  
+
+  .steps {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  
+  .step {
+    flex: 1 1 200px;
+    text-align: center;
+  }

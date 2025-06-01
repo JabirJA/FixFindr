@@ -1,0 +1,99 @@
+
+
+  
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  
+  .filters select {
+    padding: 8px;
+    border-radius: 4px;
+    border: none;
+  }
+  .contractor-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .contractor-card {
+    display: flex;
+    border-radius: 10px;
+    padding: 15px;
+    align-items: center;
+    width: 90vw;
+    max-width: 1200px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  [data-theme='light'] .contractor-card {
+    background-color:  #f9f9f9;
+  }
+  
+  [data-theme='dark'] .contractor-card {
+    background-color:  #151928;
+  }
+  
+  .contractor-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-right: 16px;
+  }
+  
+  
+  .info h2 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+
+  .info h2 a {
+    color: inherit;        /* use the surrounding text color */
+    text-decoration: none; /* remove underline */
+    cursor: pointer;       /* show pointer on hover */
+  }  
+  .info .type {
+    color: var(--subtext-color);
+    font-size: 0.95rem;
+  }
+  
+  .stars {
+    color: gold;
+    font-size: 1rem;
+  }
+  
+  .ratingnumber {
+    margin-left: 6px;
+    font-size: 1rem;
+    color: var(--subtext-color);
+  }
+  
+  .no-results {
+    text-align: center;
+    margin-top: 30px;
+    color: var(--subtext-color);
+  }
+  
+.contractors-page {
+  margin-top: 30px;
+  margin-bottom:100px;
+}
+
+  .contractor-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-right: 16px;
+  }

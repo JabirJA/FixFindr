@@ -1,0 +1,138 @@
+/* Reset some basic styles */
+* {
+ /* outline: 1px solid red;  shows all elements' boundaries */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+:root {
+  --primary: #007bff;
+  --primary-light: #cce5ff;
+  --background: #f8f9fa;
+  --card-background: #fff;
+  --text: #212529;
+  --button-text: #333; /* NEW */
+  --button-primary-bg: #0d6efd;
+--button-primary-hover: #0a58ca;
+--button-available-bg: #198754;
+--button-available-hover: #157347;
+--button-unavailable-bg: #dc3545;
+--button-unavailable-hover: #b02a37;
+  --star-gold: #ffc107;
+  --accent: #007afc;
+  --video-border-radius: 12px;
+  --video-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] {
+--page-bg: #f0f0f0; /* fixed page background color */
+--bg: #ffffff;
+--text: #000000;
+--card: #f4f4f4;
+--input-bg: #f0f0f0;
+--input-text: #000;
+--footer-bg: #f4f4f4;
+--footer-text: #333;
+--footer-link: #555;
+--footer-link-hover: #000;
+--footer-divider: #ccc;
+--hero-bg: url('../assets/whitebg.png');
+--cta-button-text: #fff;
+--subtext-color: #666;
+  --testimonial-bg: #f7f7f7;
+  --testimonial-text: #333;
+  --testimonial-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] {
+--page-bg: #0a0a0a; /* Or any dark color you prefer */
+--bg: #11141d;
+--text: #ffffff;
+--card: #151928;
+--input-bg: #151928;
+--input-text: #ffffff;
+--footer-bg: #000414;
+--footer-text: #ccc;
+--footer-link: #aaa;
+--footer-link-hover: #fff;
+--footer-divider: #333;
+--hero-bg: url('../assets/back.png');
+--cta-button-text: #222;
+--subtext-color: #aaa;
+--testimonial-bg: #333;
+--testimonial-text: #eee;
+--testimonial-shadow: 0 2px 6px rgba(0,0,0,0.7);
+--shadow-light: rgba(255, 255, 255, 0.1);
+--shadow-strong: rgba(255, 255, 255, 0.2);
+--primary: #66b2ff;
+--primary-light: #003f6b;
+--background: #121212;
+--card-background: #1e1e1e;
+--text: #eee;
+--button-text: #ccc; /* NEW */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--page-bg, #ffffff);
+  color: var(--text, #000);
+  font-family: 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4 {
+  margin-bottom: 15px;
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* Basic Button Styles */
+button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+
+/* Example for form elements */
+input[type="text"], input[type="email"], input[type="password"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  gap: 10px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

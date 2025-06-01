@@ -1,0 +1,264 @@
+.analytics {
+    padding: 1.5rem;
+    font-family: Arial, sans-serif;
+  }
+  
+  .analytics h2 {
+    margin-bottom: 1.2rem;
+  }
+  
+  .stats-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .analytics .card {
+    flex: 1;
+    min-width: 200px;
+    background-color: var(--background);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    text-align: center;
+  }
+  
+  .analytics .card p {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #3498db;
+  }
+  
+  .chart-container {
+    margin-top: 2rem;
+  }
+  
+  .pie-chart-container {
+    max-width: 600px;
+    margin: 2rem auto 0;
+  }
+  
+  .revenue-section {
+    margin-top: 2rem;
+  }
+  
+  .revenue-section h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--input-text);
+  }
+  
+  
+  .revenueCard table th,
+  .revenueCard table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .revenueCard table td {
+    font-size: 1rem;
+    color: var(--input-text);
+  }
+  
+  table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .multi-chart-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  
+  .pie-chart-wrapper {
+    flex: 1 1 300px;
+    background: var(--background);
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+    color: var(--input-text);
+  }
+  
+  .contractor-performance {
+    margin-top: 20px;
+    overflow-x: auto;
+  }
+  
+  .contractor-performance table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .contractor-performance th,
+  .contractor-performance td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .contractor-performance th {
+    background-color: #3498db;
+    color: white;
+    font-weight: 600;
+  }
+
+  .contractor-performance td {
+    color:var(--input-text);
+    font-weight: 600;
+  }
+  
+  /* Responsive */
+  @media (max-width: 900px) {
+    .stats-cards {
+      flex-direction: column;
+    }
+  
+    .multi-chart-row {
+      flex-direction: column;
+    }
+  
+    .pie-chart-wrapper {
+      width: 100%;
+    }
+  
+  }
+  .top-services {
+    margin-top: 2rem;
+  }
+  
+  .top-services h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .top-services table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .top-services th,
+  .top-services td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .top-services th {
+    background-color: #f7f7f7;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .top-services td {
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  .top-services tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .top-services td {
+    color: #4d4d4d;
+  }
+  
+  .revenue-section {
+    margin-top: 2rem;
+  }
+  
+  .revenue-section h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .revenue-summary {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .total-revenue {
+    background-color: #f7f7f7;
+    border-left: 5px solid #3498db;
+  }
+  
+  .monthly-revenue {
+    background-color: #f7f7f7;
+    border-left: 5px solid #f39c12;
+  }
+  
+  .daily-revenue {
+    background-color: #f7f7f7;
+    border-left: 5px solid #27ae60;
+  }
+  
+  
+  table th {
+    background-color: #f7f7f7;
+    font-weight: 600;
+    color: #555;
+  }
+  
+
+  table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .chart-container {
+    margin-top: 2rem;
+  }
+  
+  .chart-container h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  @media (max-width: 768px) {
+    .revenue-summary {
+      flex-direction: column;
+      gap: 2rem;
+    }
+  
+    .card {
+      flex: none;
+      width: 100%;
+    }
+  
+    table th,
+    table td {
+      padding: 10px;
+    }
+  
+    table th {
+      font-size: 1rem;
+    }
+  
+    table td {
+      font-size: 0.9rem;
+    }
+    .top-services table th,
+    .top-services table td {
+      padding: 10px;
+    }
+  
+    .top-services table th {
+      font-size: 1rem;
+    }
+  
+    .top-services table td {
+      font-size: 0.9rem;
+    }
+  }
+  

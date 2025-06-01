@@ -1,0 +1,147 @@
+.contractor-page {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  .contractor-header, .contractor-footer {
+    position: relative;
+    text-align: center;
+    padding: 90px;
+    overflow: hidden;
+    z-index: 1; /* Ensure content is above background */
+  }
+ 
+  /* Background image with blur */
+  .contractor-header::before{
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../assets/bck.png');
+    background-size: cover;
+    background-position: center;
+    filter: blur(3px); /* stronger blur */
+    z-index: -1;
+  }
+  
+  /* Overlay to darken background and contain text */
+  .overlay {
+    background-color: rgba(0, 0, 0, 0.6); /* stronger dark overlay */
+    padding: 20px 40px;
+    border-radius: 16px;
+    color: white;
+    display: inline-block;
+    max-width: 700px;
+    margin: 0 auto;
+    backdrop-filter: saturate(150%) brightness(90%);
+    -webkit-backdrop-filter: saturate(150%) brightness(90%);
+  }
+  
+  /* Logo inside header/footer */
+  .contractor-logo {
+    width: 140px;
+    margin-bottom: 1rem;
+  }
+  
+  /* Call to action button */
+  .cta-button {
+    background-color: #2a00fc;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: bold;
+    border-radius: 8px;
+    margin-top: 1rem;
+    cursor: pointer;
+    width:max-content;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cta-button:hover {
+    background-color: #1a00cc;
+  }
+  
+  .contractor-video {
+    display: block;        /* make sure it's block */
+    width: 70%;
+    border-radius: 12px;
+    margin: 1rem auto 0 auto; /* top margin 1rem, horizontal auto to center */
+  }
+  
+  /* Benefit cards container */
+  .benefit-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  /* Individual benefit card */
+  .benefit-card {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 1rem;
+    flex: 1 1 30%;
+    text-align: center;
+  }
+  
+  .benefit-card .icon {
+    font-size: 2rem;
+  }
+  
+  /* Section spacing */
+  section {
+    margin-top: 3rem;
+  }
+  
+  /* List styling */
+  ol, ul {
+    margin-left: 1.2rem;
+  }
+  
+  /* Text inside header/footer */
+  .contractor-header h1,
+  .contractor-footer h1,
+  .contractor-header h2,
+  .contractor-footer h2,
+  .contractor-header p {
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Bigger and bolder main header text */
+  .contractor-header h1,
+  .contractor-footer h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    text-shadow: 0 4px 6px rgba(0, 0, 0, 0.7);
+    animation: fadeIn 1s ease-in-out;
+  }
+  
+  /* Optional fade-in animation */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (max-width: 768px) {
+    .contractor-header, .contractor-footer {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;  /* Centers horizontally */
+      justify-content: center; /* Centers vertically if needed */
+      text-align: center;
+    }
+  
+    .cta-button {
+      margin-top: 10px; /* Optional spacing from text */
+      width:fit-content;
+    }
+  }
+  

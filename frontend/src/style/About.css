@@ -1,0 +1,114 @@
+/* Base about container */
+.about-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.about-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: var(--heading-color);
+  text-align: center;
+}
+
+.about-container section {
+  margin-top: 30px;
+}
+
+.about-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+  color: var(--heading-color);
+}
+
+.about-container p,
+.about-container ul,
+.about-container ol {
+  font-size: 1rem;
+  color: var(--paragraph-color);
+}
+
+.about-container ul,
+.about-container ol {
+  margin-left: 20px;
+}
+
+.about-container li {
+  margin-bottom: 8px;
+}
+
+/* Logo styling */
+.logo-wrapper {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.about-logo {
+  max-width: 150px;
+  height: auto;
+}
+
+.mission-section {
+  text-align: center;
+}
+/* Team Section */
+.team-section {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+
+/* Testimonials Section */
+.testimonials-section {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.testimonial {
+  max-width: 600px;
+  margin: 1rem auto;
+  font-style: italic;
+  background-color: var(--testimonial-bg);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: var(--testimonial-shadow);
+  color: var(--testimonial-text);
+}
+
+.testimonial strong {
+  display: block;
+  margin-top: 0.8rem;
+  font-style: normal;
+  color: var(--heading-color);
+}
+
+/* Call To Action */
+.cta-section {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.cta-section p {
+  color: var(--paragraph-color);
+}
+
+.cta-section .cta-button {
+  display: inline-block;
+  margin-top: 1rem;
+  background-color: var(--accent-color);
+  color: var(--cta-button-text);
+  padding: 0.7rem 2rem;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.cta-section .cta-button:hover {
+  background-color: var(--accent-hover);
+}
+
