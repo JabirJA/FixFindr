@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import logo from '../../../assets/placeholder.png';
+import { useNavigate } from 'react-router-dom';
+import { handleSignOut } from '../../../utils/functions';
 
 const Sidebar = ({ activeTab, setActiveTab, profileImage }) => {
   const defaultImage = logo;
   const userImage = profileImage || defaultImage;
-
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
-  // Show sidebar by default on large screens
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 768) {
@@ -17,7 +18,7 @@ const Sidebar = ({ activeTab, setActiveTab, profileImage }) => {
         setIsVisible(false);
       }
     };
-    handleResize(); // initial check
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -28,17 +29,16 @@ const Sidebar = ({ activeTab, setActiveTab, profileImage }) => {
 
   return (
     <>
-      {/* Toggle button always shown on small screens */}
       <button className="sidebar-toggle" onClick={toggleSidebar}>
-        ☰ 
+        ☰
       </button>
 
-      {/* Sidebar with conditional visibility on small screens */}
       <div className={`sidebar ${isVisible ? 'visible' : ''}`}>
         <div className="profile-header">
           <img src={userImage} alt="Profile" className="profile-pic" />
           <p>Welcome, Jabir</p>
         </div>
+
         <ul className="tab-list">
           <li className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
             Dashboard Home
@@ -64,7 +64,9 @@ const Sidebar = ({ activeTab, setActiveTab, profileImage }) => {
         </ul>
 
         <div className="sidebar-footer">
-          <button className="signout-button">Sign Out</button>
+          <button className="signout-button" onClick={() => handleSignOut(navigate)}>
+            Sign Out
+          </button>
         </div>
       </div>
     </>

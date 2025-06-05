@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import logo from '../../../assets/placeholder.png';
+import { handleSignOut } from '../../../utils/functions';
+import { useNavigate } from 'react-router-dom';
 
 const AdminSidebar = ({ activeTab, setActiveTab, profileImage }) => {
   const defaultImage = logo;
   const userImage = profileImage || defaultImage;
-
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -59,7 +61,9 @@ const AdminSidebar = ({ activeTab, setActiveTab, profileImage }) => {
         </ul>
 
         <div className="sidebar-footer">
-          <button className="signout-button">Sign Out</button>
+          <button className="signout-button" onClick={() => handleSignOut(navigate)}>
+                      Sign Out
+                    </button>
         </div>
       </div>
     </>

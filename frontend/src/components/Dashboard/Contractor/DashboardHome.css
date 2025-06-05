@@ -3,7 +3,6 @@
   grid-template-columns: 1fr;
   gap: 20px;
   padding: 20px;
- 
 }
 
 .section {
@@ -97,11 +96,13 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .upcoming-jobs button:hover {
   background-color: #0056b3;
 }
+
 .job-details {
   background-color: #f1f3f6;
   padding: 12px;
@@ -123,11 +124,13 @@
   color: white;
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .actions button:hover {
   background-color: #0056b3;
 }
+
 .complete-btn {
   background-color: #28a745;
   color: white;
@@ -135,6 +138,7 @@
   border-radius: 6px;
   border: none;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .complete-btn:hover {
@@ -146,4 +150,76 @@
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 5px;
+}
+
+/* Pending Jobs Section Styling */
+.section.pending-jobs {
+  background-color: var(--input-bg);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 70px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.section.pending-jobs h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: var(--input-text);
+}
+
+.pending-jobs ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pending-jobs .job-item {
+  background-color: var(--input-bg);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 12px;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.pending-jobs .job-item:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.pending-jobs .job-item strong {
+  font-weight: 600;
+  color: var(--input-text);
+}
+
+.pending-jobs .job-item p {
+  margin: 6px 0;
+  color: var(--input-text);
+}
+
+.pending-jobs button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.pending-jobs button:first-of-type {
+  background-color: #28a745;
+  color: white;
+  margin-right: 8px;
+}
+
+.pending-jobs button:first-of-type:hover {
+  background-color: #218838;
+}
+
+.pending-jobs button:last-of-type {
+  background-color: #dc3545;
+  color: white;
+}
+
+.pending-jobs button:last-of-type:hover {
+  background-color: #b02a37;
 }

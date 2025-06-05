@@ -1,21 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './ContractorsList.css';
 import logo from '../../assets/wom.png';
 import logo2 from '../../assets/man.png';
+import logo3 from '../../assets/mech2.png';
+import placeholder from '../../assets/placeholderImg.png';
 import SERVICES from '../../pages/services';
-import logo3 from '../../assets/mech2.png'
-
-const contractors = [
-  { name: 'Samuel Adeyemi', rating: 5.0, distance: 1.9, type: 'Plumber', image: logo2 },
-  { name: 'Chukwuemeka Okafor', rating: 5.0, distance: 3.7, type: 'Electrician', image: logo2 },
-  { name: 'Fatima Lawal', rating: 4.8, distance: 4.7, type: 'Mechanic', image: logo },
-  { name: 'John Doe', rating: 4.0, distance: 10.0, type: 'Mechanic', image: logo2 },
-  { name: 'Ibrahim Yusuf', rating: 4.6, distance: 5.0, type: 'AC Repair', image: logo2 },
-  { name: 'Thunder', rating: 3.0, distance: 9.0, type: 'Handyman', image: logo3 },
-  { name: 'Godwin', rating: 1.0, distance: 3.0, type: 'Carpenter', image: logo2 },
-  { name: 'Slim Sim', rating: 4.6, distance: 4.6, type: 'Electrician', image: logo3 },
-];
 
 const StarRating = ({ rating }) => {
   const stars = Math.floor(rating);
@@ -30,11 +20,12 @@ const StarRating = ({ rating }) => {
 
 const ContractorsListPage = () => {
   const { serviceType } = useParams();
-
   const decodedType = serviceType
     ? decodeURIComponent(serviceType).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
     : 'All';
 
+  const [contractors, setContractors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [minRating, setMinRating] = useState(0);
   const [maxDistance, setMaxDistance] = useState(10);
   const [typeFilter, setTypeFilter] = useState(decodedType);
@@ -43,7 +34,30 @@ const ContractorsListPage = () => {
 
   const itemsPerPage = 10;
 
-  // Filter and sort contractors
+  // Fetch contractors from backend
+  useEffect(() => {
+    const fetchContractors = async () => {
+      try {
+        const res = await fetch('http://localhost:5050/api/contractors'); 
+        const data = await res.json();
+
+        // Optional: attach default images if backend lacks image data
+        const enriched = data.map(c => ({
+          ...c,
+          image: c.image || (c.type === 'Mechanic' ? logo3 : c.name.includes('Fatima') ? logo : placeholder)
+        }));
+
+        setContractors(enriched);
+      } catch (error) {
+        console.error('Error fetching contractors:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContractors();
+  }, []);
+
   const filteredContractors = contractors
     .filter(c =>
       c.rating >= minRating &&
@@ -56,21 +70,19 @@ const ContractorsListPage = () => {
       return 0;
     });
 
-  // Calculate pagination
   const totalPages = Math.ceil(filteredContractors.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedContractors = filteredContractors.slice(startIndex, startIndex + itemsPerPage);
 
-  // Handlers for next/previous buttons
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
+
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
-  // Reset page to 1 when filters change (optional)
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [minRating, maxDistance, typeFilter, sortBy]);
 
@@ -81,25 +93,25 @@ const ContractorsListPage = () => {
       </header>
 
       <div className="filters">
-      <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
-  <option value="All">All Types</option>
-  {SERVICES.map(service => (
-    <option key={service} value={service}>{service}</option>
-  ))}
-</select>
+        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+          <option value="All">All Types</option>
+          {SERVICES.map(service => (
+            <option key={service} value={service}>{service}</option>
+          ))}
+        </select>
 
         <select value={minRating} onChange={e => setMinRating(parseFloat(e.target.value))}>
           <option value="0">All Ratings</option>
+          <option value="4">4+</option>
           <option value="4.5">4.5+</option>
-          <option value="4.8">4.8+</option>
           <option value="5.0">5.0 only</option>
         </select>
 
         <select value={maxDistance} onChange={e => setMaxDistance(parseFloat(e.target.value))}>
-          <option value="10">Any Distance</option>
-          <option value="5">Within 5 km</option>
-          <option value="3">Within 3 km</option>
-          <option value="2">Within 2 km</option>
+          <option value="45">Any Distance</option>
+          <option value="20">Within 20 km</option>
+          <option value="10">Within 10 km</option>
+          <option value="2">Within 5 km</option>
         </select>
 
         <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
@@ -109,7 +121,9 @@ const ContractorsListPage = () => {
       </div>
 
       <div className="contractor-list">
-        {paginatedContractors.length > 0 ? (
+        {loading ? (
+          <p>Loading contractors...</p>
+        ) : paginatedContractors.length > 0 ? (
           paginatedContractors.map((contractor, index) => (
             <div key={index} className="contractor-card">
               <img src={contractor.image} alt={contractor.name} />
@@ -130,7 +144,6 @@ const ContractorsListPage = () => {
         )}
       </div>
 
-      {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="pagination">
           <button onClick={handlePrevPage} disabled={currentPage === 1}>

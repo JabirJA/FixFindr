@@ -103,15 +103,6 @@ button {
 }
 
 
-/* Example for form elements */
-input[type="text"], input[type="email"], input[type="password"] {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  width: 100%;
-  margin-bottom: 15px;
-}
-
 
 table {
   width: 100%;
@@ -135,4 +126,13 @@ table {
 .pagination button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+.error-message {
+  color: red;
+  background-color: #ffe6e6;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid red;
+  border-radius: 5px;
+  text-align: center;
 }

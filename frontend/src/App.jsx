@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import './style/style.css'
+import './style/style.css';
+
 // Public pages
 import HomePage from './components/Home/Homepage';
 import LoginPage from './components/Login/Loginpage';
@@ -29,21 +30,19 @@ import HelpFeedback from './components/Dashboard/User/HelpFeedback';
 
 // Contractor Dashboard
 import ContractorDashboardPage from './components/Dashboard/Contractor/ContractorDashboard';
-import DashboardHome from './components/Dashboard/Contractor/DashboardHome';
 import JobHistoryPage from './components/Dashboard/Contractor/JobHistory';
 import MessagesPage from './components/Dashboard/Contractor/Messages';
 import CAnalytics from './components/Dashboard/Contractor/CAnalytics';
 import AvailabilityPage from './components/Dashboard/Contractor/AvailabilityPage';
 
-
-// Admin Dashboard (import your new AdminDashboard and AdminMessages)
-import AdminDashboard from './components/Dashboard/Admin/AdminDashboard';  // New main container for admin
+// Admin Dashboard
+import AdminDashboard from './components/Dashboard/Admin/AdminDashboard';
 import ContractorManagementPage from './components/Dashboard/Admin/ContractorManagement';
 import BookingManagementPage from './components/Dashboard/Admin/BookingManagement';
 import AnalyticsPage from './components/Dashboard/Admin/Analytics';
-import AdminMessages from './components/Dashboard/Admin/AdminMessages';  // Admin messages for support/disputes
-import ContractorIntro from './pages/ContractorIntro';
+import AdminMessages from './components/Dashboard/Admin/AdminMessages';
 
+import ContractorIntro from './pages/ContractorIntro';
 
 function AppWrapper() {
   const location = useLocation();
@@ -52,14 +51,15 @@ function AppWrapper() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  const hideFooterOn = [
+  // Paths where footer should be hidden - checking via startsWith to cover dynamic routes
+  const hideFooterPrefixes = [
     '/login',
     '/register',
     '/contractor-profile',
-    '/user/profile',
-    '/user/booking-confirmation',
-    '/user/chat',
-    '/user/dispute',
+    '/dashboard/profile',
+    '/dashboard/booking-confirmation',
+    '/dashboard/chat',
+    '/dashboard/security',
     '/contractor/dashboard',
     '/contractor/kyc',
     '/contractor/job-history',
@@ -69,9 +69,12 @@ function AppWrapper() {
     '/admin/bookings',
     '/admin/analytics',
     '/admin/messages',
-    '/dashboard',
-    '/checkout'
+    '/checkout',
+    '/dashboard'
   ];
+
+  // Function to check if footer should be hidden for current path
+  const shouldHideFooter = hideFooterPrefixes.some(prefix => location.pathname.startsWith(prefix));
 
   return (
     <>
@@ -92,23 +95,18 @@ function AppWrapper() {
           <Route path="/find-contractors/:serviceType" element={<ContractorsListPage />} />
           <Route path="/find-contractors" element={<ContractorsListPage />} />
 
+          {/* Dynamic contractor profile */}
           <Route path="/contractor/:name" element={<ContractorProfilePage />} />
           <Route path="/contractor-info" element={<ContractorIntro />} />
 
-         
-        {/* Main user dashboard shell */}
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/dashboard/preferences" element={<AppPreferences />} />
-        <Route path="/dashboard/help-feedback" element={<HelpFeedback />} />
-
-        {/* Sub-pages within dashboard (optional: render inside dashboard as tabs) */}
-        <Route path="/dashboard/profile" element={<UserProfile />} />
-        <Route path="/dashboard/booking-confirmation" element={<BookingConfirmation />} />
-        <Route path="/dashboard/chat" element={<Chat />} />
-        <Route path="/dashboard/security" element={<Security />} />
-
-        {/* Redirect fallback */}
-        <Route path="*" element={<UserDashboard />} />
+          {/* User dashboard */}
+          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/dashboard/preferences" element={<AppPreferences />} />
+          <Route path="/dashboard/help-feedback" element={<HelpFeedback />} />
+          <Route path="/dashboard/profile" element={<UserProfile />} />
+          <Route path="/dashboard/booking-confirmation" element={<BookingConfirmation />} />
+          <Route path="/dashboard/chat" element={<Chat />} />
+          <Route path="/dashboard/security" element={<Security />} />
 
           {/* Contractor dashboard */}
           <Route path="/contractor/dashboard" element={<ContractorDashboardPage />} />
@@ -123,9 +121,13 @@ function AppWrapper() {
           <Route path="/admin/bookings" element={<BookingManagementPage />} />
           <Route path="/admin/analytics" element={<AnalyticsPage />} />
           <Route path="/admin/messages" element={<AdminMessages />} />
+
+          {/* Catch-all fallback */}
+          <Route path="*" element={<UserDashboard />} />
         </Routes>
       </div>
-      {!hideFooterOn.includes(location.pathname) && <Footer />}
+
+      {!shouldHideFooter && <Footer />}
     </>
   );
 }
@@ -133,9 +135,9 @@ function AppWrapper() {
 function App() {
   return (
     <ThemeProvider>
-    <Router>
+      <Router>
         <AppWrapper />
-    </Router>
+      </Router>
     </ThemeProvider>
   );
 }
