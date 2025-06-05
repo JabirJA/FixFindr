@@ -8,8 +8,7 @@ const Sidebar = ({ activeTab, setActiveTab, profileImage, profileToken }) => {
   const navigate = useNavigate();
   const defaultImage = logo;
   const userImage = profileImage || defaultImage;
-
-  const [isVisible, setIsVisible] = useState(false);
+const [isVisible, setIsVisible] = useState(window.innerWidth > 768);
   const [contractor, setContractor] = useState(null);
 
   useEffect(() => {

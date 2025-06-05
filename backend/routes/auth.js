@@ -3,7 +3,6 @@ const router = express.Router();
 const pool = require('../db');
 const bcrypt = require('bcrypt');
 const { nanoid } = require('nanoid');  // <--for token
-console.log('Auth router loaded');
 
 // REGISTER
 router.post('/register', async (req, res) => {

@@ -14,7 +14,7 @@ const ContractorDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const profileImage = logo; 
-  const profileToken = localStorage.getItem('profileToken');
+  const profileToken = localStorage.getItem('profileToken'); //
 
   const renderContent = () => {
     switch (activeTab) {

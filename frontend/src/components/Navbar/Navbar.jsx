@@ -34,7 +34,7 @@ const Navbar = () => {
     if (!profileToken) return '/login'; // fallback if no token
 
     if (userRole === 'admin') return `/admin/${profileToken}`;
-    if (userRole === 'contractor') return `/contractor/${profileToken}`;
+    if (userRole === 'contractor') return `/contractor/dashboard/${profileToken}`;
     if (userRole === 'user') return `/dashboard/${profileToken}`;
 
     return '/login';

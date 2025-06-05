@@ -66,29 +66,33 @@ const RegisterPage = () => {
       };
   
       console.log('Register payload:', payload);
-
       try {
         const response = await axios.post('http://localhost:5050/auth/register', payload);
         console.log('User registered:', response.data);
+      const { role: registeredRole, profileToken } = response.data;
       
-        const { role: registeredRole, profileToken } = response.data;
+        
+        // Store login state for Navbar and session management
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', registeredRole);
         localStorage.setItem('profileToken', profileToken);
+        window.dispatchEvent(new Event('authChange'));
+      
+        // Navigate based on role
         if (registeredRole === 'user') {
           navigate(`/dashboard/${profileToken}`);
         } else if (registeredRole === 'contractor') {
           navigate(`/contractor/${profileToken}`);
         } else {
-          // fallback if role is unexpected
-          navigate('/login');
+          navigate('/login'); // fallback
         }
       } catch (error) {
         console.error('Registration failed:', error);
-      
         const errorMessage =
           error.response?.data?.error || error.response?.data?.message || 'Registration failed. Please try again.';
-      
         alert(errorMessage);
-      }      
+      }
+      
   };
 
   return (

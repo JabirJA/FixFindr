@@ -7,9 +7,22 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleRedirect = (role, profileToken) => {
+    const roleRoutes = {
+      contractor: `/contractor/${profileToken}`,
+      admin: `/admin/${profileToken}`,
+      user: `/dashboard/${profileToken}`,
+    };
+    window.location.href = roleRoutes[role] || '/login';
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setErrorMessage('');
+
     try {
       const response = await axios.post('http://localhost:5050/auth/login', {
         email,
@@ -23,22 +36,14 @@ const LoginPage = () => {
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('profileToken', profileToken);
       localStorage.setItem('userRole', role);
-      // Role-based redirects
-      if (role === 'contractor') {
-        window.location.href = `/contractor/${profileToken}`;
-      } else if (role === 'admin') {
-        window.location.href = `/admin/${profileToken}`;
-      } else if (role === 'user') {
-        window.location.href = `/dashboard/${profileToken}`;
-      } else {
-        window.location.href = '/login'; // fallback
-      }
 
-
+      handleRedirect(role, profileToken);
     } catch (error) {
       const message = error.response?.data?.error || 'Login failed. Please try again.';
       console.error('Login failed:', message);
       setErrorMessage(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,6 +67,7 @@ const LoginPage = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
 
@@ -74,14 +80,15 @@ const LoginPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
           />
           <div className="forgot-password">
             <a href="/forgot-password">Forgot password?</a>
           </div>
         </div>
 
-        <button type="submit" className="login-button">
-          Login
+        <button type="submit" className="login-button" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
 

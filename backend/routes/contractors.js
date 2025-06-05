@@ -6,42 +6,42 @@ const pool = require('../db');
 router.get('/dashboard/:profileToken', async (req, res) => {
     const { profileToken } = req.params;
   
-    const query = `
-      SELECT 
-        c.contractor_id,
-        c.service_type,
-        c.city,
-        c.state,
-        c.age,
-        c.nin,
-        c.trade_certificate,
-        c.government_id_photo,
-        c.past_work_photos,
-        c.languages,
-        c.intro_text,
-        c.experience,
-        c.profile_photo,
-        c.availability,
-        c.means_of_transport,
-        c.bvn,
-        c.residential_address,
-        c.lga,
-        c.phone_number,
-        c.star_rating,
-        c.verified,
-        c.created_at,
-        c.updated_at,
-        u.first_name,
-        u.last_name,
-        u.email,
-        u.profile_token
-      FROM users u
-      INNER JOIN contractors c ON u.user_id = c.user_id
-      WHERE u.profile_token = $1 AND u.role = 'contractor'
-      LIMIT 1;
-    `;
-  
     try {
+      const query = `
+        SELECT 
+          c.contractor_id,
+          c.service_type,
+          c.city,
+          c.state,
+          c.age,
+          c.nin,
+          c.trade_certificate,
+          c.government_id_photo,
+          c.past_work_photos,
+          c.languages,
+          c.intro_text,
+          c.experience,
+          c.profile_photo,
+          c.availability,
+          c.means_of_transport,
+          c.bvn,
+          c.residential_address,
+          c.lga,
+          c.phone_number,
+          c.star_rating,
+          c.verified,
+          c.created_at,
+          c.updated_at,
+          u.first_name,
+          u.last_name,
+          u.email,
+          u.profile_token
+        FROM users u
+        INNER JOIN contractors c ON u.user_id = c.user_id
+        WHERE u.profile_token = $1 AND u.role = 'contractor'
+        LIMIT 1;
+      `;
+  
       const result = await pool.query(query, [profileToken]);
   
       if (result.rows.length === 0) {
@@ -54,6 +54,7 @@ router.get('/dashboard/:profileToken', async (req, res) => {
       return res.status(500).json({ error: 'Internal server error' });
     }
   });
+  
 
 // GET all contractors
 router.get('/', async (req, res) => {
@@ -130,54 +131,49 @@ router.post('/', async (req, res) => {
     res.status(500).send('Failed to create contractor');
   }
 });
-
 // PUT update contractor
 router.put('/:id', async (req, res) => {
-  const { id } = req.params;
-
-  const fields = [
-    'service_type', 'city', 'state', 'age', 'nin', 'trade_certificate',
-    'government_id_photo', 'past_work_photos', 'languages', 'intro_text',
-    'experience', 'profile_photo', 'means_of_transport', 'bvn',
-    'residential_address', 'lga', 'phone_number'
-  ];
-
-  const updates = fields.map((field, i) => `${field} = $${i + 2}`).join(', ');
-  const values = fields.map(f => req.body[f]);
-  values.unshift(id); // id as first argument
-
-  try {
-    const result = await pool.query(
-      `UPDATE contractors SET ${updates} WHERE contractor_id = $1 RETURNING *`,
-      values
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).send('Contractor not found');
+    const { id } = req.params;
+  
+    const fields = [
+      'service_type', 'city', 'state', 'age', 'nin', 'trade_certificate',
+      'government_id_photo', 'past_work_photos', 'languages', 'intro_text',
+      'experience', 'profile_photo', 'means_of_transport', 'bvn',
+      'residential_address', 'lga', 'phone_number'
+    ];
+  
+    const updates = [];
+    const values = [id]; // first param is the contractor_id
+  
+    fields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        values.push(req.body[field]);
+        updates.push(`${field} = $${values.length}`);
+      }
+    });
+  
+    if (updates.length === 0) {
+      return res.status(400).json({ message: 'No valid fields provided for update' });
     }
-
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Failed to update contractor');
-  }
-});
-
-// DELETE contractor
-router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const result = await pool.query('DELETE FROM contractors WHERE contractor_id = $1 RETURNING *', [id]);
-    if (result.rows.length === 0) {
-      return res.status(404).send('Contractor not found');
+  
+    const query = `
+      UPDATE contractors
+      SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP
+      WHERE contractor_id = $1
+      RETURNING *;
+    `;
+  
+    try {
+      const result = await pool.query(query, values);
+  
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: 'Contractor not found' });
+      }
+  
+      res.json({ message: 'Contractor updated successfully', contractor: result.rows[0] });
+    } catch (err) {
+      console.error('Error updating contractor:', err);
+      res.status(500).json({ message: 'Failed to update contractor' });
     }
-
-    res.json({ message: 'Contractor deleted successfully' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Failed to delete contractor');
-  }
-});
-
-module.exports = router;
+  });
+  module.exports = router; 

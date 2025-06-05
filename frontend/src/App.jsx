@@ -136,7 +136,7 @@ function AppWrapper() {
           <Route path="/dashboard/security" element={<Security />} />
 
           {/* Contractor dashboard */}
-          <Route path="/contractor/:token" element={<ContractorDashboardPage />} />
+          <Route path="/contractor/dashboard/:token" element={<ContractorDashboardPage />} />
           <Route path="/contractor/job-history" element={<JobHistoryPage />} />
           <Route path="/contractor/messages" element={<MessagesPage />} />
           <Route path="/contractor/analytics" element={<CAnalytics />} />
