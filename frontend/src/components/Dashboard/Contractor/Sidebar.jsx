@@ -4,24 +4,40 @@ import logo from '../../../assets/placeholder.png';
 import { useNavigate } from 'react-router-dom';
 import { handleSignOut } from '../../../utils/functions';
 
-const Sidebar = ({ activeTab, setActiveTab, profileImage }) => {
+const Sidebar = ({ activeTab, setActiveTab, profileImage, profileToken }) => {
+  const navigate = useNavigate();
   const defaultImage = logo;
   const userImage = profileImage || defaultImage;
+
   const [isVisible, setIsVisible] = useState(false);
-  const navigate = useNavigate();
+  const [contractor, setContractor] = useState(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 768) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
+    if (!profileToken) return;
+
+    const fetchContractor = async () => {
+      try {
+        const res = await fetch(`http://localhost:5050/contractors/dashboard/${profileToken}`);
+        if (!res.ok) throw new Error('Failed to fetch contractor');
+        const data = await res.json();
+        setContractor(data);
+      } catch (error) {
+        console.error('Error fetching contractor:', error);
       }
     };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+
+    fetchContractor();
+  }, [profileToken]);
+
+  const navItems = [
+    { key: 'dashboard', label: 'Dashboard Home' },
+    { key: 'availability', label: 'Availability' },
+    { key: 'messages', label: 'Messages' },
+    { key: 'history', label: 'Job History' },
+    { key: 'analytics', label: 'Analytics' },
+    { key: 'account', label: 'Account Info' },
+    { key: 'settings', label: 'App Preferences' },
+  ];
 
   const toggleSidebar = () => {
     setIsVisible(!isVisible);
@@ -36,31 +52,19 @@ const Sidebar = ({ activeTab, setActiveTab, profileImage }) => {
       <div className={`sidebar ${isVisible ? 'visible' : ''}`}>
         <div className="profile-header">
           <img src={userImage} alt="Profile" className="profile-pic" />
-          <p>Welcome, Jabir</p>
+          <p>Welcome, {contractor?.first_name || 'Contractor'}</p>
         </div>
 
         <ul className="tab-list">
-          <li className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
-            Dashboard Home
-          </li>
-          <li className={activeTab === 'availability' ? 'active' : ''} onClick={() => setActiveTab('availability')}>
-            Availability
-          </li>
-          <li className={activeTab === 'messages' ? 'active' : ''} onClick={() => setActiveTab('messages')}>
-            Messages
-          </li>
-          <li className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>
-            Job History
-          </li>
-          <li className={activeTab === 'analytics' ? 'active' : ''} onClick={() => setActiveTab('analytics')}>
-            Analytics
-          </li>
-          <li className={activeTab === 'account' ? 'active' : ''} onClick={() => setActiveTab('account')}>
-            Account Info
-          </li>
-          <li className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>
-            App Preferences
-          </li>
+          {navItems.map(({ key, label }) => (
+            <li
+              key={key}
+              className={activeTab === key ? 'active' : ''}
+              onClick={() => setActiveTab(key)}
+            >
+              {label}
+            </li>
+          ))}
         </ul>
 
         <div className="sidebar-footer">

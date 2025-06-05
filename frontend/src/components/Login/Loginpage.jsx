@@ -16,21 +16,24 @@ const LoginPage = () => {
         password,
       });
 
-      const { userId, role } = response.data;
+      const { userId, role, profileToken } = response.data;
 
       localStorage.setItem('userId', userId);
       localStorage.setItem('role', role);
       localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('profileToken', profileToken);
       localStorage.setItem('userRole', role);
-
-      // Redirect based on backend-verified role
+      // Role-based redirects
       if (role === 'contractor') {
-        window.location.href = '/contractor/dashboard';
+        window.location.href = `/contractor/${profileToken}`;
       } else if (role === 'admin') {
-        window.location.href = '/admin';
+        window.location.href = `/admin/${profileToken}`;
+      } else if (role === 'user') {
+        window.location.href = `/dashboard/${profileToken}`;
       } else {
-        window.location.href = '/dashboard';
+        window.location.href = '/login'; // fallback
       }
+
 
     } catch (error) {
       const message = error.response?.data?.error || 'Login failed. Please try again.';

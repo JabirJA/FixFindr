@@ -4,24 +4,37 @@ import logo from '../../../assets/placeholder.png';
 import { handleSignOut } from '../../../utils/functions';
 import { useNavigate } from 'react-router-dom';
 
-const UserSidebar = ({ activeTab, setActiveTab, profileImage }) => {
+const UserSidebar = ({ activeTab, setActiveTab, profileImage, profileToken }) => {
+  const navigate = useNavigate();
   const defaultImage = logo;
   const userImage = profileImage || defaultImage;
-  const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isVisible, setIsVisible] = useState(window.innerWidth > 768);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 768) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
+    if (!profileToken) return;
+
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`http://localhost:5050/user/dashboard/${profileToken}`);
+        if (!res.ok) throw new Error('Failed to fetch user');
+        const data = await res.json();
+        setUser(data);
+      } catch (error) {
+        console.error('Error fetching user:', error);
       }
     };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+
+    fetchUser();
+  }, [profileToken]);
+
+  const navItems = [
+    { key: 'profile', label: 'User Profile' },
+    { key: 'bookings', label: 'Booking Confirmations' },
+    { key: 'security', label: 'Security & Settings' },
+    { key: 'help', label: 'Help & Feedback' },
+    { key: 'settings', label: 'App Preferences' },
+  ];
 
   const toggleSidebar = () => {
     setIsVisible(!isVisible);
@@ -36,31 +49,25 @@ const UserSidebar = ({ activeTab, setActiveTab, profileImage }) => {
       <div className={`user-sidebar ${isVisible ? 'visible' : ''}`}>
         <div className="user-profile-header">
           <img src={userImage} alt="User" className="user-profile-pic" />
-          <p className="user-welcome">Hi, Jabir</p>
+          <p className="user-welcome">Hi, {user?.first_name || 'Guest'}</p>
         </div>
 
         <ul className="user-tab-list">
-          <li className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
-            User Profile
-          </li>
-          <li className={activeTab === 'bookings' ? 'active' : ''} onClick={() => setActiveTab('bookings')}>
-            Booking Confirmations
-          </li>
-          <li className={activeTab === 'security' ? 'active' : ''} onClick={() => setActiveTab('security')}>
-            Security & Settings
-          </li>
-          <li className={activeTab === 'help' ? 'active' : ''} onClick={() => setActiveTab('help')}>
-            Help & Feedback
-          </li>
-          <li className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>
-            App Preferences
-          </li>
+          {navItems.map((item) => (
+            <li
+              key={item.key}
+              className={activeTab === item.key ? 'active' : ''}
+              onClick={() => setActiveTab(item.key)}
+            >
+              {item.label}
+            </li>
+          ))}
         </ul>
 
         <div className="sidebar-footer">
           <button className="signout-button" onClick={() => handleSignOut(navigate)}>
-                      Sign Out
-                    </button>
+            Sign Out
+          </button>
         </div>
       </div>
     </>

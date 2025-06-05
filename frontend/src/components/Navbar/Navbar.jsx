@@ -7,13 +7,16 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
+  const [profileToken, setProfileToken] = useState('');
 
   useEffect(() => {
     const updateAuthState = () => {
       const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      const role = localStorage.getItem('userRole');
+      const role = localStorage.getItem('userRole') || '';
+      const token = localStorage.getItem('profileToken') || '';
       setIsLoggedIn(loggedIn);
-      setUserRole(role || '');
+      setUserRole(role);
+      setProfileToken(token);
     };
 
     updateAuthState();
@@ -28,9 +31,13 @@ const Navbar = () => {
   };
 
   const getDashboardLink = () => {
-    if (userRole === 'admin') return '/admin';
-    if (userRole === 'contractor') return '/contractor/dashboard';
-    return '/dashboard';
+    if (!profileToken) return '/login'; // fallback if no token
+
+    if (userRole === 'admin') return `/admin/${profileToken}`;
+    if (userRole === 'contractor') return `/contractor/${profileToken}`;
+    if (userRole === 'user') return `/dashboard/${profileToken}`;
+
+    return '/login';
   };
 
   return (

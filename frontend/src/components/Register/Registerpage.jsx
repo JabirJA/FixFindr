@@ -65,20 +65,30 @@ const RegisterPage = () => {
         role,
       };
   
-    console.log('Register payload:', payload);
-    try {
-      const response = await axios.post('http://localhost:5050/auth/register', payload);
-      console.log('User registered:', response.data);
+      console.log('Register payload:', payload);
 
-      if (role === 'user') {
-        navigate('/dashboard');
-      } else if (role === 'contractor') {
-        navigate('/contractor/dashboard');
-      }
-    } catch (error) {
-      console.error('Registration failed:', error);
-      alert(error.response?.data?.message || 'Registration failed. Please try again.');
-    }
+      try {
+        const response = await axios.post('http://localhost:5050/auth/register', payload);
+        console.log('User registered:', response.data);
+      
+        const { role: registeredRole, profileToken } = response.data;
+        localStorage.setItem('profileToken', profileToken);
+        if (registeredRole === 'user') {
+          navigate(`/dashboard/${profileToken}`);
+        } else if (registeredRole === 'contractor') {
+          navigate(`/contractor/${profileToken}`);
+        } else {
+          // fallback if role is unexpected
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error('Registration failed:', error);
+      
+        const errorMessage =
+          error.response?.data?.error || error.response?.data?.message || 'Registration failed. Please try again.';
+      
+        alert(errorMessage);
+      }      
   };
 
   return (

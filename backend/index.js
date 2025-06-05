@@ -1,14 +1,17 @@
-require('dotenv').config(); // ensure env vars are loaded
+require('dotenv').config(); // load env vars
 
 const express = require('express');
 const cors = require('cors');
+
 const authRoutes = require('./routes/auth');
 const contractorRoutes = require('./routes/contractors');
+const userRoutes = require('./routes/user'); // <-- import your user routes here
+
 const app = express();
 const PORT = process.env.PORT || 5050;
 
-app.use(cors());           // CORS middleware before any routes
-app.use(express.json());   // JSON body parser
+app.use(cors());
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Fix-Finder backend is up and running');
@@ -16,8 +19,9 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/contractors', contractorRoutes);
+app.use('/user', userRoutes);  // <-- add this line to mount your user routes
 
-// Optional: 404 handler for unknown routes
+// Optional: 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });

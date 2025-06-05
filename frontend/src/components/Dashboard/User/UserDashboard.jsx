@@ -11,7 +11,8 @@ const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
 
   const profileImage = null; // Replace with user?.profileImage when integrating auth
-
+  const profileToken = localStorage.getItem('profileToken'); //
+  
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
@@ -31,10 +32,11 @@ const UserDashboard = () => {
 
   return (
     <div className="dashboard-container">
-      <UserSidebar
+     <UserSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         profileImage={profileImage}
+        profileToken={profileToken}  
       />
       <div className="dashboard-main">
         {renderContent()}

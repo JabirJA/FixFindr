@@ -1,5 +1,7 @@
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+
 import './style/style.css';
 
 // Public pages
@@ -44,6 +46,30 @@ import AdminMessages from './components/Dashboard/Admin/AdminMessages';
 
 import ContractorIntro from './pages/ContractorIntro';
 
+function RedirectToDashboard() {
+  const token = localStorage.getItem("profile_token");
+
+  if (!token) return <Navigate to="/login" replace />;
+
+  try {
+    const decoded = jwtDecode(token);
+    const role = decoded?.role;
+
+    if (role === 'contractor') {
+      return <Navigate to={`/contractor/${token}`} replace />;
+    } else if (role === 'admin') {
+      return <Navigate to={`/admin/${token}`} replace />;
+    } else if (role === 'user') {
+      return <Navigate to={`/dashboard/${token}`} replace />;
+    } else {
+      return <Navigate to="/login" replace />;
+    }
+  } catch (err) {
+    console.error("Invalid token", err);
+    return <Navigate to="/login" replace />;
+  }
+}
+
 function AppWrapper() {
   const location = useLocation();
 
@@ -51,7 +77,6 @@ function AppWrapper() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Paths where footer should be hidden - checking via startsWith to cover dynamic routes
   const hideFooterPrefixes = [
     '/login',
     '/register',
@@ -73,8 +98,9 @@ function AppWrapper() {
     '/dashboard'
   ];
 
-  // Function to check if footer should be hidden for current path
-  const shouldHideFooter = hideFooterPrefixes.some(prefix => location.pathname.startsWith(prefix));
+  const shouldHideFooter = hideFooterPrefixes.some(prefix =>
+    location.pathname.startsWith(prefix)
+  );
 
   return (
     <>
@@ -94,13 +120,14 @@ function AppWrapper() {
           <Route path="/terms/:role" element={<TermsPage />} />
           <Route path="/find-contractors/:serviceType" element={<ContractorsListPage />} />
           <Route path="/find-contractors" element={<ContractorsListPage />} />
-
-          {/* Dynamic contractor profile */}
           <Route path="/contractor/:name" element={<ContractorProfilePage />} />
           <Route path="/contractor-info" element={<ContractorIntro />} />
 
+          {/* Role-based redirect */}
+          <Route path="/dashboard-redirect" element={<RedirectToDashboard />} />
+
           {/* User dashboard */}
-          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/dashboard/:token" element={<UserDashboard />} />
           <Route path="/dashboard/preferences" element={<AppPreferences />} />
           <Route path="/dashboard/help-feedback" element={<HelpFeedback />} />
           <Route path="/dashboard/profile" element={<UserProfile />} />
@@ -109,21 +136,21 @@ function AppWrapper() {
           <Route path="/dashboard/security" element={<Security />} />
 
           {/* Contractor dashboard */}
-          <Route path="/contractor/dashboard" element={<ContractorDashboardPage />} />
+          <Route path="/contractor/:token" element={<ContractorDashboardPage />} />
           <Route path="/contractor/job-history" element={<JobHistoryPage />} />
           <Route path="/contractor/messages" element={<MessagesPage />} />
           <Route path="/contractor/analytics" element={<CAnalytics />} />
           <Route path="/contractor/availability" element={<AvailabilityPage />} />
 
           {/* Admin dashboard */}
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/:token" element={<AdminDashboard />} />
           <Route path="/admin/contractors" element={<ContractorManagementPage />} />
           <Route path="/admin/bookings" element={<BookingManagementPage />} />
           <Route path="/admin/analytics" element={<AnalyticsPage />} />
           <Route path="/admin/messages" element={<AdminMessages />} />
 
           {/* Catch-all fallback */}
-          <Route path="*" element={<UserDashboard />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
 

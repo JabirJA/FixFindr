@@ -2,6 +2,59 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
+// GET contractor dashboard info by profileToken
+router.get('/dashboard/:profileToken', async (req, res) => {
+    const { profileToken } = req.params;
+  
+    const query = `
+      SELECT 
+        c.contractor_id,
+        c.service_type,
+        c.city,
+        c.state,
+        c.age,
+        c.nin,
+        c.trade_certificate,
+        c.government_id_photo,
+        c.past_work_photos,
+        c.languages,
+        c.intro_text,
+        c.experience,
+        c.profile_photo,
+        c.availability,
+        c.means_of_transport,
+        c.bvn,
+        c.residential_address,
+        c.lga,
+        c.phone_number,
+        c.star_rating,
+        c.verified,
+        c.created_at,
+        c.updated_at,
+        u.first_name,
+        u.last_name,
+        u.email,
+        u.profile_token
+      FROM users u
+      INNER JOIN contractors c ON u.user_id = c.user_id
+      WHERE u.profile_token = $1 AND u.role = 'contractor'
+      LIMIT 1;
+    `;
+  
+    try {
+      const result = await pool.query(query, [profileToken]);
+  
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Contractor not found' });
+      }
+  
+      return res.status(200).json(result.rows[0]);
+    } catch (err) {
+      console.error('Error fetching contractor dashboard info:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
 // GET all contractors
 router.get('/', async (req, res) => {
   try {

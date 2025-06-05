@@ -153,9 +153,10 @@ router.post('/login', async (req, res) => {
 
   try {
     const userResult = await pool.query(
-      'SELECT user_id, email, password_hash, role FROM users WHERE email = $1',
-      [email]
-    );
+        'SELECT user_id, email, password_hash, role, profile_token FROM users WHERE email = $1',
+        [email]
+      );
+      
 
     if (userResult.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password' });
@@ -163,22 +164,18 @@ router.post('/login', async (req, res) => {
 
     const user = userResult.rows[0];
     
-    if (role === 'user' && (user.role === 'user' || user.role === 'admin')) {
-        // allow admin login even if role sent was 'user'
-      } else if (user.role !== role) {
-        return res.status(403).json({ error: 'Access denied for selected role' });
-      }
-      
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     res.status(200).json({
-      message: 'Login successful',
-      userId: user.user_id,
-      role: user.role
-    });
+        message: 'Login successful',
+        userId: user.user_id,
+        role: user.role,
+        profileToken: user.profile_token  // send it here
+      });
+      
 
   } catch (err) {
     console.error('Login error:', err);

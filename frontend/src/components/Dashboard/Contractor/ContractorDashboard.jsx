@@ -6,17 +6,15 @@ import JobHistory from './JobHistory';
 import Messages from './Messages';
 import AppPreferences from '../AppPreferences';
 import CAnalytics from './CAnalytics';
+import Availability from './AvailabilityPage';
 import './Dashboard.css';
-import logo from '../../../assets/man.png';
-import Availability from './AvailabilityPage'; // adjust path as needed
-
-
+import logo from '../../../assets/man.png'; // Placeholder or default image
 
 const ContractorDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Temporary mock profile image (null to test fallback)
-  const profileImage = logo || null; // Replace with user?.profileImage if available
+  const profileImage = logo; 
+  const profileToken = localStorage.getItem('profileToken');
 
   const renderContent = () => {
     switch (activeTab) {
@@ -28,7 +26,7 @@ const ContractorDashboard = () => {
         return <JobHistory />;
       case 'messages':
         return <Messages />;
-     case 'settings':
+      case 'settings':
         return <AppPreferences />;
       case 'analytics':
         return <CAnalytics />;
@@ -45,6 +43,7 @@ const ContractorDashboard = () => {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         profileImage={profileImage}
+        profileToken={profileToken}
       />
       <div className="dashboard-main">
         {renderContent()}
