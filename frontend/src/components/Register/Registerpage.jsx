@@ -250,7 +250,7 @@ const RegisterPage = () => {
             Agree with{' '}
             <span
               className="terms-text"
-              style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+              style={{ cursor: 'pointer'}}
               onClick={() => setShowTermsModal(true)}
             >
               Terms and Conditions

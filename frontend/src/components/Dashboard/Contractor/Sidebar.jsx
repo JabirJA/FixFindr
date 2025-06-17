@@ -7,7 +7,7 @@ import { handleSignOut } from '../../../utils/functions';
 const Sidebar = ({ activeTab, setActiveTab, profileImage, profileToken }) => {
   const navigate = useNavigate();
   const defaultImage = logo;
-  const userImage = profileImage || defaultImage;
+  const userImage = defaultImage || profileImage;
 const [isVisible, setIsVisible] = useState(window.innerWidth > 768);
   const [contractor, setContractor] = useState(null);
 

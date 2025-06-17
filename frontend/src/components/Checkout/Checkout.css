@@ -259,3 +259,169 @@
 .modal-close-button:hover {
   background-color: #0056b3;
 }
+
+.booking-card.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
+
+.booking-detail-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.booking-detail-row label {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.booking-detail-row input,
+.booking-detail-row select {
+  padding: 8px;
+  border: 1px solid var(--border, #ccc);
+  border-radius: 6px;
+}
+
+.booking-detail-row span {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #ccc);
+}
+
+.booking-detail-row button {
+  padding: 6px 12px;
+  background-color: var(--accent, #007bff);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.booking-detail-row button:hover {
+  background-color: var(--primary-light, #0056b3);
+}
+
+.map-iframe {
+  width: 100%;
+  border: 1px solid #ccc;
+}
+.checkout-breakdown {
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.checkout-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.checkout-breakdown-row label {
+  font-size: 15px;
+  color: var(--input-text);
+}
+
+.checkout-breakdown-row .price {
+  font-weight: bold;
+  color: var(--input-text);
+}
+
+.checkout-breakdown-row.total {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 12px;
+}
+@media (max-width: 768px) {
+  .checkout-container {
+    padding: 20px;
+    margin: 20px auto;
+  }
+
+  .checkout-title {
+    font-size: 24px;
+  }
+
+  .contractor-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .contractor-photo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .booking-cards {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .booking-card {
+    min-width: 100%;
+  }
+
+  .checkout-input {
+    font-size: 14px;
+  }
+
+  .checkout-button {
+    font-size: 15px;
+    padding: 12px 0;
+  }
+
+  .modal-content {
+    max-width: 90%;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-container {
+    padding: 16px;
+    margin: 16px auto;
+  }
+
+  .checkout-title {
+    font-size: 20px;
+  }
+
+  .contractor-photo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .booking-card {
+    padding: 12px;
+  }
+
+  .booking-info h4 {
+    font-size: 16px;
+  }
+
+  .booking-info p {
+    font-size: 12px;
+  }
+
+  .checkout-booking-details p,
+  .checkout-breakdown-row label {
+    font-size: 14px;
+  }
+
+  .checkout-breakdown-row.total {
+    font-size: 16px;
+  }
+
+  .schedule-dropdown select {
+    font-size: 14px;
+  }
+
+  .modal-close-button {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+}

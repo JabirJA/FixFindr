@@ -13,164 +13,134 @@ function AccountInfo() {
     photo: null,
     references: null,
     vehicleProof: null,
-    workSamples: [], // multiple images of past work
+    workSamples: [],
   });
 
   const [formData, setFormData] = useState({
-    phone: '',
-    email: '',
     experience: '',
-    nin: '',
-    bvn: '',
-    address: '',
+    workAddress: '',
     state: '',
     lga: '',
+    bio: '',
   });
 
   const [errors, setErrors] = useState({});
+  const [lgaOptions, setLgaOptions] = useState([]);
 
-  // Cleanup object URLs for work samples to avoid memory leaks
+  const stateLgas = {
+    Abuja: ['Abaji', 'Bwari', 'Gwagwalada', 'Kuje', 'Kwali', 'Municipal Area Council'],
+    Lagos: ['Agege', 'Ajeromi-Ifelodun', 'Alimosho', 'Amuwo-Odofin', 'Apapa', 'Badagry', 'Epe', 'Eti-Osa', 'Ibeju-Lekki', 'Ifako-Ijaiye', 'Ikeja', 'Ikorodu', 'Kosofe', 'Lagos Island', 'Lagos Mainland', 'Mushin', 'Ojo', 'Oshodi-Isolo', 'Shomolu', 'Surulere'],
+  };
+
   useEffect(() => {
-    // Revoke URLs when component unmounts or workSamples change
+    if (formData.state && stateLgas[formData.state]) {
+      setLgaOptions(stateLgas[formData.state]);
+      setFormData(prev => ({ ...prev, lga: '' }));
+    } else {
+      setLgaOptions([]);
+      setFormData(prev => ({ ...prev, lga: '' }));
+    }
+
     return () => {
       files.workSamples.forEach(file => {
-        if (file.preview) {
-          URL.revokeObjectURL(file.preview);
-        }
+        if (file.preview) URL.revokeObjectURL(file.preview);
       });
     };
-  }, [files.workSamples]);
+  }, [formData.state, files.workSamples]);
 
-  // Handle file changes (single files and multiple work samples)
   const handleFileChange = (e, field) => {
     if (field === 'workSamples') {
       const selectedFiles = Array.from(e.target.files).map(file => {
-        // Create preview URL for each file
         file.preview = URL.createObjectURL(file);
         return file;
       });
 
-      // Validate file types
-      const invalidFiles = selectedFiles.filter(
-        (file) => !['image/jpeg', 'image/png'].includes(file.type)
-      );
-
-      if (invalidFiles.length > 0) {
-        setErrors(prev => ({
-          ...prev,
-          workSamples: 'Only JPG or PNG images are allowed for past work.',
-        }));
+      if (selectedFiles.some(file => !['image/jpeg', 'image/png'].includes(file.type))) {
+        setErrors(prev => ({ ...prev, workSamples: 'Only JPG or PNG images are allowed for past work.' }));
         return;
       }
 
       if (selectedFiles.length > 5) {
-        setErrors(prev => ({
-          ...prev,
-          workSamples: 'You can upload a maximum of 5 images for past work.',
-        }));
+        setErrors(prev => ({ ...prev, workSamples: 'You can upload a maximum of 5 images for past work.' }));
         return;
       }
 
-      setFiles(prev => ({
-        ...prev,
-        workSamples: selectedFiles,
-      }));
-
+      setFiles(prev => ({ ...prev, workSamples: selectedFiles }));
       setErrors(prev => ({ ...prev, workSamples: null }));
     } else {
       const file = e.target.files[0];
-      setFiles(prev => ({
-        ...prev,
-        [field]: file,
-      }));
+      if (file && !acceptedTypes.includes(file.type)) {
+        setErrors(prev => ({ ...prev, [field]: `Invalid file type for ${field}.` }));
+        return;
+      }
+      setFiles(prev => ({ ...prev, [field]: file }));
+      setErrors(prev => ({ ...prev, [field]: null }));
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const validate = () => {
     const newErrors = {};
-
-    // Basic input validations
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required.';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email address is required.';
-    }
-
-    if (!formData.experience.trim()) {
-      newErrors.experience = 'Experience is required.';
-    }
-
-    if (!formData.nin.trim()) {
-      newErrors.nin = 'NIN is required.';
-    } else if (!/^\d{11}$/.test(formData.nin)) {
-      newErrors.nin = 'NIN must be exactly 11 digits.';
-    }
-
-    if (!formData.address.trim()) {
-      newErrors.address = 'Residential address is required.';
-    }
-
-    if (!formData.state.trim()) {
-      newErrors.state = 'State of residence is required.';
-    }
-
-    if (!formData.lga.trim()) {
-      newErrors.lga = 'LGA is required.';
-    }
-
-    if (!termsAccepted) {
-      newErrors.terms = 'You must accept the declaration.';
-    }
-
-    // File validations
-    if (!files.id) {
-      newErrors.id = 'Government-issued ID is required.';
-    } else if (!acceptedTypes.includes(files.id.type)) {
-      newErrors.id = 'ID must be a valid image or PDF file.';
-    }
-
-    if (!files.photo) {
-      newErrors.photo = 'A personal photo is required.';
-    } else if (!acceptedTypes.includes(files.photo.type)) {
-      newErrors.photo = 'Photo must be a valid image file.';
-    }
-
-    // Validate work samples (at least one)
-    if (!files.workSamples.length) {
-      newErrors.workSamples = 'At least one image of past work is required.';
-    }
-
+    if (!formData.experience.trim()) newErrors.experience = 'Years of experience is required.';
+    if (!formData.workAddress.trim()) newErrors.workAddress = 'Work address is required.';
+    if (!formData.state.trim()) newErrors.state = 'State of residence is required.';
+    if (!formData.lga.trim()) newErrors.lga = 'LGA is required.';
+    if (!formData.bio.trim()) newErrors.bio = 'Short bio is required.';
+    else if (formData.bio.trim().split(/\s+/).length > 15) newErrors.bio = 'Bio must be 15 words or fewer.';
+    if (!termsAccepted) newErrors.terms = 'You must accept the declaration.';
+    if (!files.id) newErrors.id = 'Government-issued ID is required.';
+    else if (!acceptedTypes.includes(files.id.type)) newErrors.id = 'ID must be a valid image or PDF.';
+    if (!files.photo) newErrors.photo = 'A personal photo is required.';
+    else if (!acceptedTypes.includes(files.photo.type)) newErrors.photo = 'Photo must be a valid image.';
+    if (!files.workSamples.length) newErrors.workSamples = 'At least one image of past work is required.';
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-
     setErrors({});
     setStatus('Pending');
-    alert('Your profile has been submitted for verification.');
+
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+    data.append('transport', transport);
+    Object.entries(files).forEach(([key, value]) => {
+      if (key === 'workSamples') {
+        value.forEach((file, idx) => data.append(`workSample_${idx}`, file));
+      } else if (value) {
+        data.append(key, value);
+      }
+    });
+
+    try {
+      const response = await fetch('http://localhost:5050/contractors/submit-kyc', {
+        method: 'POST',
+        body: data,
+      });
+
+      if (!response.ok) throw new Error('Submission failed');
+      alert('Your profile has been submitted for verification.');
+    } catch (err) {
+      alert('There was an error submitting your profile. Please try again.');
+      console.error(err);
+    }
   };
 
   return (
     <div className="kyc-container">
       <p>
-        Upload your documents for verification. Include a valid government ID, trade certificate,
-        a clear photo, references (if any), and proof of transport. Ensure all info is correct.
+        Upload your documents for verification. The more supporting documents you provide, the better your chances of verification.
+        Include a valid government ID, trade certificate, clear photo, references (if any), proof of transport, and past work samples.
+        Ensure all info is correct.
       </p>
 
       <div className="status">
@@ -179,207 +149,83 @@ function AccountInfo() {
       </div>
 
       <form onSubmit={handleSubmit} className="kyc-form">
-        {/* File Uploads */}
+        <input type="text" name="experience" placeholder="Years of Experience" value={formData.experience} onChange={handleInputChange} />
+        {errors.experience && <span className="error">{errors.experience}</span>}
+
+        <input type="text" name="workAddress" placeholder="Work Address" value={formData.workAddress} onChange={handleInputChange} />
+        {errors.workAddress && <span className="error">{errors.workAddress}</span>}
+
+        <select name="state" value={formData.state} onChange={handleInputChange}>
+          <option value="">Select State of Residence</option>
+          <option value="Abuja">Abuja</option>
+          <option value="Lagos">Lagos</option>
+        </select>
+        {errors.state && <span className="error">{errors.state}</span>}
+
+        <select name="lga" value={formData.lga} onChange={handleInputChange} disabled={!lgaOptions.length}>
+          <option value="">Select LGA</option>
+          {lgaOptions.map(lga => (
+            <option key={lga} value={lga}>{lga}</option>
+          ))}
+        </select>
+        {errors.lga && <span className="error">{errors.lga}</span>}
+
+        <textarea
+          name="bio"
+          placeholder="Short intro (max 15 words, e.g., Experienced mechanic...)"
+          value={formData.bio}
+          onChange={handleInputChange}
+        />
+        {errors.bio && <span className="error">{errors.bio}</span>}
+
+        <select value={transport} onChange={e => setTransport(e.target.value)}>
+          <option value="">Select Mode of Transport</option>
+          <option value="bike">Bike</option>
+          <option value="car">Car</option>
+          <option value="truck">Truck</option>
+          <option value="none">None</option>
+        </select>
+
         <label>
-          Government ID (Required):
-          <input
-            type="file"
-            accept="image/jpeg,image/png,application/pdf"
-            onChange={(e) => handleFileChange(e, 'id')}
-          />
+          Upload Government-issued ID
+          <input type="file" onChange={(e) => handleFileChange(e, 'id')} />
           {errors.id && <span className="error">{errors.id}</span>}
         </label>
 
         <label>
-          Trade Certificate (Optional):
-          <input
-            type="file"
-            accept="image/jpeg,image/png,application/pdf"
-            onChange={(e) => handleFileChange(e, 'tradeCertificate')}
-          />
+          Upload Trade Certificate
+          <input type="file" onChange={(e) => handleFileChange(e, 'tradeCertificate')} />
         </label>
 
         <label>
-          Personal Photo (Required):
-          <input
-            type="file"
-            accept="image/jpeg,image/png"
-            onChange={(e) => handleFileChange(e, 'photo')}
-          />
+          Upload Personal Photo
+          <input type="file" onChange={(e) => handleFileChange(e, 'photo')} />
           {errors.photo && <span className="error">{errors.photo}</span>}
         </label>
 
         <label>
-          Proof of Transport (e.g., Plate or Side View):
-          <input
-            type="file"
-            accept="image/jpeg,image/png,application/pdf"
-            onChange={(e) => handleFileChange(e, 'vehicleProof')}
-          />
+          Upload References (Optional)
+          <input type="file" onChange={(e) => handleFileChange(e, 'references')} />
         </label>
 
         <label>
-          References (Optional):
-          <input
-            type="file"
-            accept="image/jpeg,image/png,application/pdf"
-            onChange={(e) => handleFileChange(e, 'references')}
-          />
+          Upload Vehicle Proof (Optional)
+          <input type="file" onChange={(e) => handleFileChange(e, 'vehicleProof')} />
         </label>
 
-        {/* Multiple images of past work */}
         <label>
-          Upload Images of Past Work (up to 5 images):
-          <input
-            type="file"
-            accept="image/jpeg,image/png"
-            multiple
-            onChange={(e) => handleFileChange(e, 'workSamples')}
-          />
+          Upload Work Samples (up to 5 images)
+          <input type="file" multiple onChange={(e) => handleFileChange(e, 'workSamples')} />
           {errors.workSamples && <span className="error">{errors.workSamples}</span>}
-
-          <div className="preview-grid">
-            {files.workSamples.length > 0 &&
-              files.workSamples.map((file, idx) => (
-                <img
-                  key={idx}
-                  src={file.preview}
-                  alt={`Work Sample ${idx + 1}`}
-                  className="preview-thumbnail"
-                />
-              ))}
-          </div>
-        </label>
-
-        {/* Transport Ownership */}
-        <label>
-          Do you own a means of transport?
-          <select value={transport} onChange={(e) => setTransport(e.target.value)}>
-            <option value="">-- Select Option --</option>
-            <option value="Car">Yes – Car</option>
-            <option value="Motorcycle">Yes – Motorcycle</option>
-            <option value="Tricycle">Yes – Tricycle (Keke)</option>
-            <option value="No">No</option>
-          </select>
-        </label>
-
-        <h3>Personal & Contact Information</h3>
-
-        <label>
-          Phone Number (WhatsApp): *
-          <input
-            type="text"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-          />
-          {errors.phone && <span className="error">{errors.phone}</span>}
         </label>
 
         <label>
-          Email Address: *
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-          />
-          {errors.email && <span className="error">{errors.email}</span>}
-        </label>
-
-        <label>
-          Years of Experience: *
-          <input
-            type="number"
-            name="experience"
-            value={formData.experience}
-            onChange={handleInputChange}
-            min="0"
-          />
-          {errors.experience && <span className="error">{errors.experience}</span>}
-        </label>
-
-        <label>
-          NIN (National ID Number): *
-          <input
-            type="text"
-            name="nin"
-            value={formData.nin}
-            onChange={handleInputChange}
-            maxLength="11"
-          />
-          {errors.nin && <span className="error">{errors.nin}</span>}
-        </label>
-
-        <label>
-          BVN (Bank Verification Number): (Optional)
-          <input
-            type="text"
-            name="bvn"
-            value={formData.bvn}
-            onChange={handleInputChange}
-            maxLength="11"
-          />
-        </label>
-
-        <label>
-          Residential Address: *
-          <input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-          />
-          {errors.address && <span className="error">{errors.address}</span>}
-        </label>
-
-        <label>
-          State of Residence: *
-          <select name="state" value={formData.state} onChange={handleInputChange}>
-            <option value="">-- Select State --</option>
-            <option value="Lagos">Lagos</option>
-            <option value="Abuja">Abuja</option>
-            <option value="Kano">Kano</option>
-            {/* Add more states as needed */}
-          </select>
-          {errors.state && <span className="error">{errors.state}</span>}
-        </label>
-
-        <label>
-          Local Government Area (LGA): *
-          <input
-            type="text"
-            name="lga"
-            value={formData.lga}
-            onChange={handleInputChange}
-          />
-          {errors.lga && <span className="error">{errors.lga}</span>}
-        </label>
-
-        <label className="checkbox-field ">
-          <input
-            type="checkbox"
-            checked={termsAccepted}
-            onChange={() => setTermsAccepted(!termsAccepted)}
-          />
-          I hereby declare that the information provided is true and accurate to the best of my knowledge.
+          <input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} />
+          I hereby declare that all information provided is accurate to the best of my knowledge.
         </label>
         {errors.terms && <span className="error">{errors.terms}</span>}
 
-        <div className='submit-buttonu'>
-        <button type="submit" disabled={!termsAccepted} style={{
-          backgroundColor: 'var(--accent)',
-          color: 'white',
-          padding: '0.6rem 1.2rem',
-          border: 'none',
-          borderRadius: '6px',
-          fontWeight: 'bold',
-          cursor: 'pointer',
-          marginTop: '1rem'
-        }}>
-          Submit & Update Profile
-        </button>
-        </div>
+        <button type="submit">Submit for validation</button>
       </form>
     </div>
   );

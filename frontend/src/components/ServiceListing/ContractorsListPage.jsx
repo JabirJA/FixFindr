@@ -34,18 +34,32 @@ const ContractorsListPage = () => {
 
   const itemsPerPage = 10;
 
-  // Fetch contractors from backend
   useEffect(() => {
     const fetchContractors = async () => {
       try {
-        const res = await fetch('http://localhost:5050/api/contractors'); 
-        const data = await res.json();
+        const res = await fetch('http://localhost:5050/contractors');
 
-        // Optional: attach default images if backend lacks image data
-        const enriched = data.map(c => ({
-          ...c,
-          image: c.image || (c.type === 'Mechanic' ? logo3 : c.name.includes('Fatima') ? logo : placeholder)
-        }));
+        if (!res.ok) {
+          throw new Error(`Failed to fetch: ${res.status}`);
+        }
+
+        const data = await res.json();
+        const enriched = data.map(c => {
+          const name = `${c.first_name || ''} ${c.last_name || ''}`.trim();
+          const image = c.profile_photo || (
+            c.service_type === 'Mechanic' ? logo3 :
+            (c.first_name && c.first_name.endsWith('a') ? logo : placeholder)
+          );
+
+          return {
+            ...c,
+            name: name || 'Unnamed Contractor',
+            image,
+            type: c.service_type || 'Unknown',
+            rating: c.star_rating || 0,
+            distance: c.distance || Math.floor(Math.random() * 20) + 1 // mock distance
+          };
+        });
 
         setContractors(enriched);
       } catch (error) {
@@ -85,7 +99,6 @@ const ContractorsListPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [minRating, maxDistance, typeFilter, sortBy]);
-
   return (
     <div className="contractors-page" data-theme="light">
       <header className="header">
@@ -111,7 +124,7 @@ const ContractorsListPage = () => {
           <option value="45">Any Distance</option>
           <option value="20">Within 20 km</option>
           <option value="10">Within 10 km</option>
-          <option value="2">Within 5 km</option>
+          <option value="5">Within 5 km</option>
         </select>
 
         <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
@@ -126,16 +139,16 @@ const ContractorsListPage = () => {
         ) : paginatedContractors.length > 0 ? (
           paginatedContractors.map((contractor, index) => (
             <div key={index} className="contractor-card">
-              <img src={contractor.image} alt={contractor.name} />
+              <img src={contractor.image} alt={contractor.name || 'Contractor'} />
               <div className="info">
                 <h2>
-                  <Link to={`/contractor/${contractor.name.replace(/\s+/g, '').toLowerCase()}`}>
-                    {contractor.name}
+                  <Link to={`/contractor/${(contractor.name || 'contractor').replace(/\s+/g, '').toLowerCase()}`}>
+                    {contractor.name || 'Unnamed Contractor'}
                   </Link>
                 </h2>
-                <p className="type">{contractor.type}</p>
-                <StarRating rating={contractor.rating} />
-                <p>{contractor.distance} km away</p>
+                <p className="type">{contractor.type || 'Unknown Type'}</p>
+                <StarRating rating={contractor.rating || 0} />
+                <p>{contractor.distance || '?'} km away</p>
               </div>
             </div>
           ))

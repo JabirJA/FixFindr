@@ -11,7 +11,7 @@ const LoginPage = () => {
 
   const handleRedirect = (role, profileToken) => {
     const roleRoutes = {
-      contractor: `/contractor/${profileToken}`,
+      contractor: `/contractor/dashboard/${profileToken}`,
       admin: `/admin/${profileToken}`,
       user: `/dashboard/${profileToken}`,
     };

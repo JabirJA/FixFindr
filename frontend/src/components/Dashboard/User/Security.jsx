@@ -1,7 +1,7 @@
 import React from "react";
 import "./User.css";
 
-export default function Security() {
+export default function Security({ user }) {
   return (
     <div className="security-container">
       <h1 className="security-heading">Security & Settings</h1>
@@ -15,7 +15,7 @@ export default function Security() {
         <div className="security-row">
           <p className="row-label">Email</p>
           <div className="row-content">
-            <span className="row-value">jamaljabir4@gmail.com</span>
+            <span className="row-value">{user?.email}</span>
             <button className="link-button">Update</button>
           </div>
         </div>
@@ -25,14 +25,6 @@ export default function Security() {
           <div className="row-content">
             <span className="row-value">••••••••</span>
             <button className="link-button">Change Password</button>
-          </div>
-        </div>
-
-        <div className="security-row">
-          <p className="row-label">Connected Devices</p>
-          <div className="row-content">
-            <span className="row-value">2 active sessions</span>
-            <button className="link-button">Sign Out Everywhere</button>
           </div>
         </div>
       </section>

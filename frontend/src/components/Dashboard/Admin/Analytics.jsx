@@ -7,111 +7,38 @@ import './Analytics.css';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AA46BE', '#D72631'];
 
-const mockStats = {
-  totalBookings: 128,
-  activeContractors: 37,
-  monthlyRevenue: 46500,
-  averageStarRating: 4.3,
-  dailyActiveUsers: 75,
-  averageBookingValue: 364,
-  bookingCancellationRate: 0.1, // 10%
-  repeatBookingRate: 0.55,
-  averageFulfillmentTime: 2.4, // in hours
-  topCancelledServices: [
-    { service: 'DSTV Repairman', count: 5 },
-    { service: 'Borehole Repair Technician', count: 4 },
-  ],
-  peakBookingTimes: [
-    { hour: '08:00', count: 15 },
-    { hour: '12:00', count: 25 },
-    { hour: '18:00', count: 40 },
-  ],
-  referralRate: 0.25,
-  revenueByService: [
-    { service: 'Plumbing', revenue: 15000 },
-    { service: 'Electrical', revenue: 12000 },
-    { service: 'Carpentry', revenue: 8000 },
-    { service: 'Cleaning', revenue: 11500 },
-  ],
-  bookingStatusBreakdown: [
-    { name: 'Completed', value: 85 },
-    { name: 'Pending', value: 30 },
-    { name: 'Cancelled', value: 13 },
-  ],
-  newVsReturningUsers: [
-    { name: 'New Users', value: 45 },
-    { name: 'Returning Users', value: 55 },
-  ],
-  bookingDataPerDay: [
-    { day: 'Mon', bookings: 15 },
-    { day: 'Tue', bookings: 20 },
-    { day: 'Wed', bookings: 22 },
-    { day: 'Thu', bookings: 19 },
-    { day: 'Fri', bookings: 24 },
-    { day: 'Sat', bookings: 17 },
-    { day: 'Sun', bookings: 11 },
-  ],
-  contractorPerformance: [
-    { name: 'John Doe', bookings: 45, rating: 4.7 },
-    { name: 'Jane Smith', bookings: 32, rating: 4.5 },
-    { name: 'Alan Brown', bookings: 27, rating: 4.3 },
-    { name: 'Emily White', bookings: 18, rating: 4.9 },
-  ],
-
-    totalBookings: 128,
-    activeContractors: 37,
-    monthlyRevenue: 46500,
-    dailyRevenue: 1500,
-    totalRevenue: 600000,  // Total Revenue example
-    revenueByService: [
-      { service: 'Plumbing', revenue: 15000 },
-      { service: 'Electrical', revenue: 12000 },
-      { service: 'Carpentry', revenue: 8000 },
-      { service: 'Cleaning', revenue: 11500 },
-    ],
-    bookingDataPerDay: [
-      { day: 'Mon', bookings: 15 },
-      { day: 'Tue', bookings: 20 },
-      { day: 'Wed', bookings: 22 },
-      { day: 'Thu', bookings: 19 },
-      { day: 'Fri', bookings: 24 },
-      { day: 'Sat', bookings: 17 },
-      { day: 'Sun', bookings: 11 },
-    ],
-    monthlyData: [
-      { month: 'January', revenue: 3500 },
-      { month: 'February', revenue: 4200 },
-      { month: 'March', revenue: 4900 },
-      { month: 'April', revenue: 5500 },
-      { month: 'May', revenue: 4800 },
-      { month: 'June', revenue: 5100 },
-      { month: 'July', revenue: 4600 },
-      { month: 'August', revenue: 5300 },
-      { month: 'September', revenue: 5500 },
-      { month: 'October', revenue: 6000 },
-      { month: 'November', revenue: 6500 },
-      { month: 'December', revenue: 7000 },
-    ],
-    incomeStreams: {
-      onboardingFee: 30000,
-      recurringRevenue: {
-        platformFee: 5000,
-        bookingFees: 5000,
-        subscriptionPlans: 5000,
-        sponsoredListings: 10000,
-        premiumMatchmaking: 3000,
-      },
-    },
-  
-  
-};
-
-const Analytics = () => {
-  const [stats, setStats] = useState(mockStats);
+const Analytics = ({profileToken}) => {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    setStats(mockStats); // Replace this with a real API call for live data
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`http://localhost:5050/admin${profileToken}/stats`); // Adjust endpoint as needed
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setStats(data);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load analytics data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
   }, []);
+
+  if (loading) {
+    return <div className="analytics">Loading analytics...</div>;
+  }
+
+  if (error) {
+    return <div className="analytics error">{error}</div>;
+  }
 
   return (
     <div className="analytics">
@@ -128,7 +55,7 @@ const Analytics = () => {
         </div>
         <div className="card">
           <h3>Monthly Revenue</h3>
-          <p>${stats.monthlyRevenue.toLocaleString()}</p>
+          <p>₦{stats.monthlyRevenue.toLocaleString()}</p>
         </div>
         <div className="card">
           <h3>Average Star Rating</h3>
@@ -140,7 +67,7 @@ const Analytics = () => {
         </div>
         <div className="card">
           <h3>Average Booking Value</h3>
-          <p>${stats.averageBookingValue}</p>
+          <p>₦{stats.averageBookingValue.toLocaleString()}</p>
         </div>
         <div className="card">
           <h3>Booking Cancellation Rate</h3>
@@ -183,7 +110,6 @@ const Analytics = () => {
                 dataKey="value"
                 nameKey="name"
                 outerRadius={80}
-                fill="#8884d8"
                 label
               >
                 {stats.bookingStatusBreakdown.map((entry, index) => (
@@ -205,7 +131,6 @@ const Analytics = () => {
                 dataKey="value"
                 nameKey="name"
                 outerRadius={80}
-                fill="#82ca9d"
                 label
               >
                 {stats.newVsReturningUsers.map((entry, index) => (
@@ -226,7 +151,7 @@ const Analytics = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="service" />
             <YAxis />
-            <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+            <Tooltip formatter={(value) => `₦${value.toLocaleString()}`} />
             <Bar dataKey="revenue" fill="#8884d8" />
           </BarChart>
         </ResponsiveContainer>
@@ -241,7 +166,6 @@ const Analytics = () => {
               dataKey="count"
               nameKey="service"
               outerRadius={80}
-              fill="#FF8042"
               label
             >
               {stats.topCancelledServices.map((entry, index) => (
@@ -288,80 +212,75 @@ const Analytics = () => {
           </tbody>
         </table>
       </div>
-      <div className="analytics">
-            <h2>Dashboard Analytics</h2>
-      
-            {/* Revenue Section */}
-            <div className="revenue-section">
-              <h3>Revenue Overview</h3>
-              <div className="revenue-summary">
-                <div className="card total-revenue">
-                  <h4>Total Revenue</h4>
-                  <p>₦{stats.totalRevenue.toLocaleString()}</p>
-                </div>
-                <div className="card monthly-revenue">
-                  <h4>Monthly Revenue</h4>
-                  <p>₦{stats.monthlyRevenue.toLocaleString()}</p>
-                </div>
-                <div className="card daily-revenue">
-                  <h4>Daily Revenue</h4>
-                  <p>₦{stats.dailyRevenue.toLocaleString()}</p>
-                </div>
-              </div>
-      
-              <div className="revenueCard">
-                <h4>Revenue Streams Breakdown</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Revenue Stream</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Onboarding Fee</td>
-                      <td>₦{stats.incomeStreams.onboardingFee.toLocaleString()} per contractor</td>
-                    </tr>
-                    <tr>
-                      <td>Platform Maintenance Fee</td>
-                      <td>₦{stats.incomeStreams.recurringRevenue.platformFee.toLocaleString()}/month</td>
-                    </tr>
-                    <tr>
-                      <td>Average Booking Fee</td>
-                      <td>₦{stats.incomeStreams.recurringRevenue.bookingFees.toLocaleString()}</td>
-                    </tr>
-                    <tr>
-                      <td>Contractor Subscription</td>
-                      <td>₦{stats.incomeStreams.recurringRevenue.subscriptionPlans.toLocaleString()}/month</td>
-                    </tr>
-                    <tr>
-                      <td>Sponsored Listings</td>
-                      <td>₦{stats.incomeStreams.recurringRevenue.sponsoredListings.toLocaleString()}/week</td>
-                    </tr>
-                    <tr>
-                      <td>Premium Matchmaking</td>
-                      <td>₦{stats.incomeStreams.recurringRevenue.premiumMatchmaking.toLocaleString()}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-      
-            {/* Bar Chart for Monthly Revenue */}
-            <div className="chart-container">
-              <h3>Monthly Revenue Trends</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={stats.monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="revenue" fill="#3498db" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            </div>
+
+      <div className="revenue-section">
+        <h3>Revenue Overview</h3>
+        <div className="revenue-summary">
+          <div className="card total-revenue">
+            <h4>Total Revenue</h4>
+            <p>₦{stats.totalRevenue.toLocaleString()}</p>
+          </div>
+          <div className="card monthly-revenue">
+            <h4>Monthly Revenue</h4>
+            <p>₦{stats.monthlyRevenue.toLocaleString()}</p>
+          </div>
+          <div className="card daily-revenue">
+            <h4>Daily Revenue</h4>
+            <p>₦{stats.dailyRevenue.toLocaleString()}</p>
+          </div>
+        </div>
+
+        <div className="revenueCard">
+          <h4>Revenue Streams Breakdown</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Revenue Stream</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Onboarding Fee</td>
+                <td>₦{stats.incomeStreams.onboardingFee.toLocaleString()} per contractor</td>
+              </tr>
+              <tr>
+                <td>Platform Maintenance Fee</td>
+                <td>₦{stats.incomeStreams.recurringRevenue.platformFee.toLocaleString()}/month</td>
+              </tr>
+              <tr>
+                <td>Average Booking Fee</td>
+                <td>₦{stats.incomeStreams.recurringRevenue.bookingFees.toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td>Contractor Subscription</td>
+                <td>₦{stats.incomeStreams.recurringRevenue.subscriptionPlans.toLocaleString()}/month</td>
+              </tr>
+              <tr>
+                <td>Sponsored Listings</td>
+                <td>₦{stats.incomeStreams.recurringRevenue.sponsoredListings.toLocaleString()}/week</td>
+              </tr>
+              <tr>
+                <td>Premium Matchmaking</td>
+                <td>₦{stats.incomeStreams.recurringRevenue.premiumMatchmaking.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="chart-container">
+        <h3>Monthly Revenue Trends</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={stats.monthlyData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="revenue" fill="#3498db" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

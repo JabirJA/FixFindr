@@ -13,7 +13,7 @@ const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true); // for toggle on small screens
 
   const profileImage = logo || null; // Replace with admin?.profileImage if available
-
+  const profileToken = localStorage.getItem('profileToken'); //
   const handleLogout = () => {
     // Implement your logout logic here, e.g., clear auth tokens, redirect, etc.
     console.log('Logout clicked');
@@ -24,19 +24,20 @@ const AdminDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'analytics':
-        return <Analytics />;
+        return <Analytics profileToken={profileToken} />;
       case 'contractors':
         return <ContractorManagement />;
       case 'bookings':
         return <BookingManagement />;
       case 'messages':
         return <Messages />;
-        case 'settings':
-            return <AppPreferences />;
+      case 'settings':
+        return <AppPreferences />;
       default:
-        return <Analytics />;
+        return <Analytics profileToken={profileToken} />;
     }
   };
+  
 
   return (
     <div className="dashboard-container">
@@ -46,6 +47,7 @@ const AdminDashboard = () => {
         setActiveTab={setActiveTab}
         profileImage={profileImage}
         isAdmin={true}
+        profileToken={profileToken}
         isOpen={sidebarOpen}
         onLogout={handleLogout}
       />

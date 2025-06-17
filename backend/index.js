@@ -1,12 +1,12 @@
-require('dotenv').config(); // load env vars
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const contractorRoutes = require('./routes/contractors');
-const userRoutes = require('./routes/user'); // <-- import your user routes here
-
+const userRoutes = require('./routes/user');
+const adminRoutes = require('./routes/admin');
 const app = express();
 const PORT = process.env.PORT || 5050;
 
@@ -19,14 +19,13 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/contractors', contractorRoutes);
-app.use('/user', userRoutes);  // <-- add this line to mount your user routes
+app.use('/user', userRoutes);
+app.use('/admin', adminRoutes);
 
-// Optional: 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
 
-// Optional: global error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal Server Error' });

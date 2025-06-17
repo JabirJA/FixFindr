@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import UserSidebar from './UserSidebar';
 import UserProfile from './UserProfile';
 import BookingConfirmations from './BookingConfirmation';
@@ -9,34 +10,46 @@ import './User.css';
 
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  const [user, setUser] = useState(null);
 
-  const profileImage = null; // Replace with user?.profileImage when integrating auth
-  const profileToken = localStorage.getItem('profileToken'); //
-  
+  const profileToken = localStorage.getItem('profileToken');
+
+  useEffect(() => {
+    if (profileToken) {
+      axios.get(`/user/dashboard/${profileToken}`)
+        .then(res => {
+          setUser(res.data);
+        })
+        .catch(err => {
+          console.error('Error fetching user:', err);
+        });
+    }
+  }, [profileToken]);
+
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <UserProfile />;
+        return <UserProfile user={user} />;
       case 'bookings':
         return <BookingConfirmations />;
       case 'security':
-        return <SecuritySettings />;
+        return <SecuritySettings user={user}/>;
       case 'help':
         return <HelpFeedback />;
       case 'settings':
         return <AppPreferences />;
       default:
-        return <UserProfile />;
+        return <UserProfile user={user} />;
     }
   };
 
   return (
     <div className="dashboard-container">
-     <UserSidebar
+      <UserSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        profileImage={profileImage}
-        profileToken={profileToken}  
+        profileImage={null}
+        profileToken={profileToken}
       />
       <div className="dashboard-main">
         {renderContent()}

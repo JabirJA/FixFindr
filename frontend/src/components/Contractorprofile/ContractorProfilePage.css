@@ -15,6 +15,12 @@
   margin-bottom: 40px;
   flex-wrap: wrap;
 }
+.unavailable-note {
+  color: #b00;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
 
 .contractorimage {
   flex: 1 1 auto;
