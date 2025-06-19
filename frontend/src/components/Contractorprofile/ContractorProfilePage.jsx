@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './ContractorProfilePage.css';
-import logo2 from '../../assets/man.png';
-import logo3 from '../../assets/mech2.png';
-import placeholder from '../../assets/placeholderImg.png';
+import { getProfilePhotoUrl, getPastWorkPhotoUrls } from '../../utils/images';
 
 const StarRatings = ({ rating }) => {
   const fullStars = Math.floor(rating);
@@ -47,9 +45,8 @@ const ContractorProfilePage = () => {
           const enriched = {
             ...matched,
             name: `${matched.first_name} ${matched.last_name}`,
-            image: matched.profile_photo || (
-              matched.service_type === 'Mechanic' ? logo3 : placeholder
-            ),
+            profilePhotoUrl: getProfilePhotoUrl(matched),
+            pastWorkPhotoUrls: getPastWorkPhotoUrls(matched),
             rating: matched.star_rating || 0,
             services: matched.services || [],
             gallery: matched.gallery || [],
@@ -61,15 +58,16 @@ const ContractorProfilePage = () => {
               mapEmbedUrl: ''
             },
             languages: matched.languages || 'English',
-            experienceYears: matched.experience_years || 0,
+            experience: matched.experience || 0,
             phone: matched.phone || 'N/A',
             email: matched.email || 'N/A'
           };
-
+        
           setContractor(enriched);
         } else {
           setContractor(null);
         }
+        
 
       } catch (error) {
         console.error('❌ Error fetching contractor:', error);
@@ -90,8 +88,8 @@ const ContractorProfilePage = () => {
     last_name,
     image,
     rating,
-    intro,
-    experienceYears,
+    bio,
+    experience,
     languages,
     services,
     gallery,
@@ -111,7 +109,8 @@ const ContractorProfilePage = () => {
   return (
     <div className="contractor-profile-container">
       <div className="contractor-main-card">
-        <img src={image} alt={`${first_name} ${last_name}`} className="contractorimage" />
+
+    <img className="contractorimage" src={contractor.profilePhotoUrl} alt="Profile Photo" />
         <div className="contractor-info">
           <h1 className="contractor-name">{first_name} {last_name}</h1>
           <p className="contractor-services-summary">{services.map(s => s.name).join(', ')}</p>
@@ -136,8 +135,8 @@ const ContractorProfilePage = () => {
 
       <section className="about-section">
         <h2>About This Contractor</h2>
-        <p className="intro">{intro || 'No intro provided.'}</p>
-        <p className="experience"><strong>Experience:</strong> {experienceYears} years</p>
+        <p className="intro">{bio || 'No intro provided.'}</p>
+        <p className="experience"><strong>Experience:</strong> {experience} years</p>
         <p className="lang"><strong>Languages Spoken:</strong> {languages}</p>
       </section>
 
@@ -165,17 +164,23 @@ const ContractorProfilePage = () => {
           <p>No reviews yet.</p>
         )}
       </section>
-
       <section className="gallery-section">
-        <h2>Past Work</h2>
-        <div className="gallery">
-          {gallery.length > 0 ? (
-            gallery.map((url, i) => <img key={i} src={url} alt={`Work ${i + 1}`} />)
-          ) : (
-            <p>No gallery images.</p>
-          )}
-        </div>
-      </section>
+  <h2>Past Work</h2>
+  <div className="gallery img">
+    {contractor && contractor.pastWorkPhotoUrls && contractor.pastWorkPhotoUrls.length > 0 ? (
+      contractor.pastWorkPhotoUrls.map((url, idx) => (
+        <img key={idx} src={url} alt={`Past Work ${idx + 1}`} />
+      ))
+    ) : gallery && gallery.length > 0 ? (
+      gallery.map((url, i) => (
+        <img key={i} src={url} alt={`Work ${i + 1}`} />
+      ))
+    ) : (
+      <p>No gallery images.</p>
+    )}
+  </div>
+</section>
+
 
       <h2>Weekly Availability</h2>
       <div className="availability-center">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import DashboardHome from './DashboardHome';
 import AccountInfo from './AccountInfo';
@@ -8,20 +8,43 @@ import AppPreferences from '../AppPreferences';
 import CAnalytics from './CAnalytics';
 import Availability from './AvailabilityPage';
 import './Dashboard.css';
-import logo from '../../../assets/man.png'; // Placeholder or default image
 
 const ContractorDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [contractor, setContractor] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const profileImage = logo; 
-  const profileToken = localStorage.getItem('profileToken'); //
+  const profileToken = localStorage.getItem('profileToken');
+
+  useEffect(() => {
+    if (!profileToken) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchContractor = async () => {
+      try {
+        const res = await fetch(`http://localhost:5050/contractors/dashboard/${profileToken}`);
+        if (!res.ok) throw new Error('Failed to fetch contractor');
+        const data = await res.json();
+        console.log('Fetched contractor:', data);
+        setContractor(data.contractor || data); 
+      } catch (error) {
+        console.error('Error fetching contractor:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContractor();
+  }, [profileToken]);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <DashboardHome />;
       case 'account':
-        return <AccountInfo />;
+        return <AccountInfo contractor={contractor} />;
       case 'history':
         return <JobHistory />;
       case 'messages':
@@ -37,16 +60,29 @@ const ContractorDashboard = () => {
     }
   };
 
+  if (!profileToken) {
+    return (
+      <div className="dashboard-container">
+        <p className="unauthorized-message">Unauthorized: Please log in to access your dashboard.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-container">
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        profileImage={profileImage}
-        profileToken={profileToken}
+        contractor={contractor}
       />
       <div className="dashboard-main">
-        {renderContent()}
+        {loading ? (
+          <div className="loading-indicator">
+            <p>Loading contractor data...</p>
+          </div>
+        ) : (
+          renderContent()
+        )}
       </div>
     </div>
   );

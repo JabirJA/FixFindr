@@ -229,4 +229,56 @@
     outline: none;
     box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
   }
+  .area-input-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  .area-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--input-bg);
+    border: 1px solid  var(--footer-bg);
+    z-index: 1000;
+    max-height: 150px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .area-suggestions li {
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  
+  .area-suggestions li:hover {
+    background-color: var(--bg-dark);
+  }
+  .bio-input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid #ccc;
+  }
+  
+  .bio-input.input-error {
+    border-color: red;
+  }
+
+  .kyc-checkbox-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* space between checkbox and text */
+  }
+  .kyc-checkbox {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+  }
+  
   

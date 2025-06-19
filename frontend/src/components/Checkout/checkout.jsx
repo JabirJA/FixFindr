@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import './Checkout.css';
 import logo2 from '../../assets/man.png';
 import { handleShareLocation, isValidPhone } from '../../utils/location';
-
+import { getProfilePhotoUrl} from '../../utils/images';
 const Checkout = () => {
   const location = useLocation();
   const contractor = location.state?.contractor;
@@ -111,7 +111,7 @@ const Checkout = () => {
       <h2 className="checkout-title">Checkout</h2>
 
       <div className="contractor-summary">
-        <img src={contractor.image || logo2} alt="Contractor" className="contractor-photo" />
+        <img src={getProfilePhotoUrl(contractor)} alt="Contractor" className="contractor-photo" />
         <div>
           <h3>{contractor.name}</h3>
           <p>{contractor.services?.map(s => s.name).join(', ')}</p>

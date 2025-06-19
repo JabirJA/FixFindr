@@ -1,82 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ContractorManagement.css';
 
-const contractorsMock = [
-  {
-    id: 1,
-    name: 'John Doe',
-    phone: '08012345678',
-    email: 'john@example.com',
-    status: 'Pending',
-    transport: 'Car',
-    experience: '5 years',
-    nin: '12345678901',
-    bvn: '12345678901',
-    address: '123 Main Street',
-    state: 'Lagos',
-    lga: 'Ikeja',
-    documents: {
-      id: 'https://via.placeholder.com/150?text=ID',
-      photo: 'https://via.placeholder.com/150?text=Photo',
-      tradeCertificate: 'https://via.placeholder.com/150?text=Trade+Cert',
-      references: null,
-      vehicleProof: 'https://via.placeholder.com/150?text=Vehicle',
-      workSamples: [
-        'https://via.placeholder.com/100?text=Work1',
-        'https://via.placeholder.com/100?text=Work2',
-      ],
-    },
-  },
-  {
-    id: 2,
-    name: 'Mary Jane',
-    phone: '08098765432',
-    email: 'mary@example.com',
-    status: 'Approved',
-    transport: 'Motorcycle',
-    experience: '2 years',
-    nin: '23456789012',
-    bvn: '23456789012',
-    address: '456 Another Street',
-    state: 'Abuja',
-    lga: 'Gwagwalada',
-    documents: {
-      id: 'https://via.placeholder.com/150?text=ID',
-      photo: 'https://via.placeholder.com/150?text=Photo',
-      tradeCertificate: null,
-      references: null,
-      vehicleProof: null,
-      workSamples: [],
-    },
-  },
-];
-
 function ContractorManagement() {
-  const [contractors, setContractors] = useState(contractorsMock);
+  const [contractors, setContractors] = useState([]);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [filterStatus, setFilterStatus] = useState('All');
-  const [modalType, setModalType] = useState(null); // 'management' or 'details'
 
-  const handleAction = (id, action) => {
-    setContractors(prev =>
-      prev.map(c =>
-        c.id === id ? { ...c, status: action === 'approve' ? 'Approved' : 'Declined' } : c
-      )
-    );
-    setSelectedContractor(null);
-  };
+  useEffect(() => {
+    fetchContractors();
+  }, []);
 
-  const handleRemove = (id) => {
-    if (window.confirm('Are you sure you want to remove this contractor?')) {
-      setContractors(prev => prev.filter(c => c.id !== id));
-      setSelectedContractor(null);
+  const fetchContractors = async () => {
+    try {
+      const res = await fetch('http://localhost:5050/contractors');
+      if (!res.ok) throw new Error('Failed to fetch contractors');
+      const data = await res.json();
+      setContractors(data);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      alert('Could not load contractors');
     }
   };
 
-  const filteredContractors =
-    filterStatus === 'All'
-      ? contractors
-      : contractors.filter(c => c.status === filterStatus);
+  const handleVerify = async (id, verified) => {
+    try {
+      const res = await fetch(`http://localhost:5050/contractors/${id}/verify`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verified })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(data.message || 'Contractor updated');
+        setContractors(prev =>
+          prev.map(c => c.contractor_id === id ? { ...c, verified } : c)
+        );
+        setSelectedContractor(prev => prev ? { ...prev, verified } : prev);
+      } else {
+        alert(data.error || 'Verification failed');
+      }
+    } catch (err) {
+      console.error('Verify error:', err);
+      alert('Server error verifying contractor');
+    }
+  };
+
+  const handleRemove = async (id) => {
+    if (!window.confirm('Are you sure you want to remove this contractor?')) return;
+    try {
+      const res = await fetch(`http://localhost:5050/contractors/${id}`, {
+        method: 'DELETE',
+      });
+  
+      if (res.ok) {
+        alert('Contractor removed successfully');
+        setContractors(prev => prev.filter(c => c.contractor_id !== id));
+        setSelectedContractor(null); // Optional: reset selection if applicable
+      } else {
+        const data = await res.json();
+        alert(data.error || data.message || 'Removal failed');
+      }
+    } catch (err) {
+      console.error('Remove error:', err);
+      alert('Server error removing contractor');
+    }
+  };
+  
+
+  const filteredContractors = contractors.filter(c => {
+    if (filterStatus === 'All') return true;
+    return filterStatus === 'Verified' ? c.verified : !c.verified;
+  });
 
   return (
     <div className="cm-container">
@@ -89,9 +84,8 @@ function ContractorManagement() {
           onChange={(e) => setFilterStatus(e.target.value)}
         >
           <option value="All">All</option>
-          <option value="Pending">Pending</option>
-          <option value="Approved">Approved</option>
-          <option value="Declined">Declined</option>
+          <option value="Verified">Verified</option>
+          <option value="Unverified">Unverified</option>
         </select>
       </div>
 
@@ -100,111 +94,81 @@ function ContractorManagement() {
           <tr>
             <th>Name</th>
             <th>Phone</th>
-            <th>Status</th>
+            <th>Verified</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {filteredContractors.map((c) => (
-            <tr key={c.id}>
+          {filteredContractors.map(c => (
+            <tr key={c.contractor_id}>
               <td>
                 <button
                   className="cm-link-button"
-                  onClick={() => {
-                    setSelectedContractor(c);
-                    setModalType('management');
-                  }}
+                  onClick={() => setSelectedContractor(c)}
                 >
-                  {c.name}
+                  {c.first_name} {c.last_name}
                 </button>
               </td>
-              <td>{c.phone}</td>
+              <td>{c.phone_number}</td>
               <td>
-  <span className={`cm-status ${c.status.toLowerCase()}`}>{c.status}</span>
-</td>
-
+                <span className={`cm-status ${c.verified ? 'approved' : 'pending'}`}>
+                  {c.verified ? 'Verified' : 'Unverified'}
+                </span>
+              </td>
               <td>
-                <button
-                  onClick={() => {
-                    setSelectedContractor(c);
-                    setModalType('details');
-                  }}
-                >
-                  View Details
-                </button>
+                <button onClick={() => setSelectedContractor(c)}>Manage</button>
               </td>
             </tr>
           ))}
+          {filteredContractors.length === 0 && (
+            <tr>
+              <td colSpan="4" style={{ textAlign: 'center' }}>No contractors found</td>
+            </tr>
+          )}
         </tbody>
       </table>
 
       {selectedContractor && (
         <div className="cm-modal-overlay" onClick={() => setSelectedContractor(null)}>
           <div className="cm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>{selectedContractor.name}'s {modalType === 'details' ? 'Details' : 'Management'}</h3>
+            <h3>Manage {selectedContractor.first_name} {selectedContractor.last_name}</h3>
+            
+            <p><strong>Email:</strong> {selectedContractor.email}</p>
+            <p><strong>Phone:</strong> {selectedContractor.phone_number}</p>
+            <p><strong>Transport:</strong> {selectedContractor.means_of_transport}</p>
+            <p><strong>Address:</strong> {selectedContractor.residential_address}</p>
+            <p><strong>State:</strong> {selectedContractor.state}</p>
+            <p><strong>LGA:</strong> {selectedContractor.lga}</p>
+            <p><strong>Verified:</strong> {selectedContractor.verified ? 'Yes' : 'No'}</p>
 
-            {modalType === 'details' && (
-              <>
-                <p><strong>Email:</strong> {selectedContractor.email}</p>
-                <p><strong>Phone:</strong> {selectedContractor.phone}</p>
-                <p><strong>Experience:</strong> {selectedContractor.experience}</p>
-                <p><strong>NIN:</strong> {selectedContractor.nin}</p>
-                <p><strong>BVN:</strong> {selectedContractor.bvn}</p>
-                <p><strong>Transport:</strong> {selectedContractor.transport}</p>
-                <p><strong>Address:</strong> {selectedContractor.address}</p>
-                <p><strong>State:</strong> {selectedContractor.state}</p>
-                <p><strong>LGA:</strong> {selectedContractor.lga}</p>
-
-                <div className="cm-docs">
-                  <h4>Documents</h4>
-                  {Object.entries(selectedContractor.documents).map(([key, val]) =>
-                    key === 'workSamples' ? (
-                      <div key={key}>
-                        <strong>Work Samples:</strong>
-                        <div className="cm-samples">
-                          {val && val.length > 0 ? val.map((img, idx) => (
-                            <img src={img} alt={`Work ${idx}`} key={idx} />
-                          )) : <p>No samples</p>}
-                        </div>
-                      </div>
-                    ) : val ? (
-                      <div key={key}>
-                        <strong>{key}:</strong>
-                        <img src={val} alt={key} />
-                      </div>
-                    ) : null
-                  )}
-                </div>
-
-                {selectedContractor.status === 'Pending' && (
-                  <div className="cm-modal-actions">
-                    <button className="cm-approve" onClick={() => handleAction(selectedContractor.id, 'approve')}>
-                      Approve
-                    </button>
-                    <button className="cm-decline" onClick={() => handleAction(selectedContractor.id, 'decline')}>
-                      Decline
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-
-            {modalType === 'management' && (
-              <div className="cm-modal-actions">
-                <button className="cm-analytics" onClick={() => alert('Analytics coming soon.')}>
-                  View Analytics
+            <div className="cm-modal-actions">
+              {!selectedContractor.verified && (
+                <button
+                  className="cm-approve"
+                  onClick={() => handleVerify(selectedContractor.contractor_id, true)}
+                >
+                  Verify Contractor
                 </button>
-                <button className="cm-remove" onClick={() => handleRemove(selectedContractor.id)}>
-                  Ban Contractor
+              )}
+              {selectedContractor.verified && (
+                <button
+                  className="cm-decline"
+                  onClick={() => handleVerify(selectedContractor.contractor_id, false)}
+                >
+                  Unverify Contractor
                 </button>
-                <button className="cm-remove" onClick={() => handleRemove(selectedContractor.id)}>
-                  Suspend Contractor
-                </button>
-    
-              </div>
-            )}
+              )}
+              <button
+                className="cm-remove"
+                onClick={() => handleRemove(selectedContractor.contractor_id)}
+              >
+                Remove Contractor
+              </button>
+            </div>
 
-            <button className="cm-close-btn" onClick={() => setSelectedContractor(null)}>Close</button>
+            <button className="cm-close-btn" onClick={() => setSelectedContractor(null)}>
+              Close
+            </button>
           </div>
         </div>
       )}

@@ -4,29 +4,11 @@ import logo from '../../../assets/placeholder.png';
 import { handleSignOut } from '../../../utils/functions';
 import { useNavigate } from 'react-router-dom';
 
-const UserSidebar = ({ activeTab, setActiveTab, profileImage, profileToken }) => {
+const UserSidebar = ({ activeTab, setActiveTab, user }) => {
   const navigate = useNavigate();
-  const defaultImage = logo;
-  const userImage = profileImage || defaultImage;
-  const [user, setUser] = useState(null);
   const [isVisible, setIsVisible] = useState(window.innerWidth > 768);
 
-  useEffect(() => {
-    if (!profileToken) return;
-
-    const fetchUser = async () => {
-      try {
-        const res = await fetch(`http://localhost:5050/user/dashboard/${profileToken}`);
-        if (!res.ok) throw new Error('Failed to fetch user');
-        const data = await res.json();
-        setUser(data);
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      }
-    };
-
-    fetchUser();
-  }, [profileToken]);
+  const userImage = user?.profile_photo || logo;
 
   const navItems = [
     { key: 'profile', label: 'User Profile' },
@@ -36,8 +18,17 @@ const UserSidebar = ({ activeTab, setActiveTab, profileImage, profileToken }) =>
     { key: 'settings', label: 'App Preferences' },
   ];
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsVisible(window.innerWidth > 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const toggleSidebar = () => {
-    setIsVisible(!isVisible);
+    setIsVisible((prev) => !prev);
   };
 
   return (
@@ -53,19 +44,22 @@ const UserSidebar = ({ activeTab, setActiveTab, profileImage, profileToken }) =>
         </div>
 
         <ul className="user-tab-list">
-          {navItems.map((item) => (
+          {navItems.map(({ key, label }) => (
             <li
-              key={item.key}
-              className={activeTab === item.key ? 'active' : ''}
-              onClick={() => setActiveTab(item.key)}
+              key={key}
+              className={activeTab === key ? 'active' : ''}
+              onClick={() => setActiveTab(key)}
             >
-              {item.label}
+              {label}
             </li>
           ))}
         </ul>
 
         <div className="sidebar-footer">
-          <button className="signout-button" onClick={() => handleSignOut(navigate)}>
+          <button
+            className="signout-button"
+            onClick={() => handleSignOut(navigate)}
+          >
             Sign Out
           </button>
         </div>

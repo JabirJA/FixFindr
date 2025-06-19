@@ -21,6 +21,7 @@ app.use('/auth', authRoutes);
 app.use('/contractors', contractorRoutes);
 app.use('/user', userRoutes);
 app.use('/admin', adminRoutes);
+app.use('/uploads', express.static('uploads'));
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });

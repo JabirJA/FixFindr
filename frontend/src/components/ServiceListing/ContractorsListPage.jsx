@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './ContractorsList.css';
 import logo from '../../assets/wom.png';
-import logo2 from '../../assets/man.png';
+
 import logo3 from '../../assets/mech2.png';
 import placeholder from '../../assets/placeholderImg.png';
 import SERVICES from '../../pages/services';
@@ -27,7 +27,7 @@ const ContractorsListPage = () => {
   const [contractors, setContractors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [minRating, setMinRating] = useState(0);
-  const [maxDistance, setMaxDistance] = useState(10);
+  const [maxDistance, setMaxDistance] = useState(45);
   const [typeFilter, setTypeFilter] = useState(decodedType);
   const [sortBy, setSortBy] = useState('distance');
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,28 +38,27 @@ const ContractorsListPage = () => {
     const fetchContractors = async () => {
       try {
         const res = await fetch('http://localhost:5050/contractors');
-
-        if (!res.ok) {
-          throw new Error(`Failed to fetch: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
 
         const data = await res.json();
-        const enriched = data.map(c => {
-          const name = `${c.first_name || ''} ${c.last_name || ''}`.trim();
-          const image = c.profile_photo || (
-            c.service_type === 'Mechanic' ? logo3 :
-            (c.first_name && c.first_name.endsWith('a') ? logo : placeholder)
-          );
+        const enriched = data
+          .filter(c => c.verified) 
+          .map(c => {
+            const name = `${c.first_name || ''} ${c.last_name || ''}`.trim();
+            const image = c.profile_photo || (
+              c.service_type === 'Mechanic' ? logo3 :
+              (c.first_name && c.first_name.endsWith('a') ? logo : placeholder)
+            );
 
-          return {
-            ...c,
-            name: name || 'Unnamed Contractor',
-            image,
-            type: c.service_type || 'Unknown',
-            rating: c.star_rating || 0,
-            distance: c.distance || Math.floor(Math.random() * 20) + 1 // mock distance
-          };
-        });
+            return {
+              ...c,
+              name: name || 'Unnamed Contractor',
+              image,
+              type: c.service_type || 'Unknown',
+              rating: c.star_rating || 0,
+              distance: c.distance || Math.floor(Math.random() * 20) + 1 // mock distance
+            };
+          });
 
         setContractors(enriched);
       } catch (error) {
@@ -99,10 +98,11 @@ const ContractorsListPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [minRating, maxDistance, typeFilter, sortBy]);
+
   return (
     <div className="contractors-page" data-theme="light">
       <header className="header">
-        <h1>Find Contractors Near You</h1>
+        <h1>Find Verified Contractors Near You</h1>
       </header>
 
       <div className="filters">
@@ -153,7 +153,7 @@ const ContractorsListPage = () => {
             </div>
           ))
         ) : (
-          <p className="no-results">No contractors found for “{typeFilter}”.</p>
+          <p className="no-results">No verified contractors found for “{typeFilter}”.</p>
         )}
       </div>
 

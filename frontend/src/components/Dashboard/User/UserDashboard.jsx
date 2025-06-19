@@ -11,19 +11,27 @@ import './User.css';
 const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [user, setUser] = useState(null);
-
+  const [loading, setLoading] = useState(true);
   const profileToken = localStorage.getItem('profileToken');
 
   useEffect(() => {
-    if (profileToken) {
-      axios.get(`/user/dashboard/${profileToken}`)
-        .then(res => {
-          setUser(res.data);
-        })
-        .catch(err => {
-          console.error('Error fetching user:', err);
-        });
+    if (!profileToken) {
+      setLoading(false);
+      return;
     }
+
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5050/user/dashboard/${profileToken}`); // Fixed missing colon
+        setUser(res.data);
+      } catch (err) {
+        console.error('Error fetching user:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, [profileToken]);
 
   const renderContent = () => {
@@ -33,7 +41,7 @@ const UserDashboard = () => {
       case 'bookings':
         return <BookingConfirmations />;
       case 'security':
-        return <SecuritySettings user={user}/>;
+        return <SecuritySettings user={user} />;
       case 'help':
         return <HelpFeedback />;
       case 'settings':
@@ -43,16 +51,31 @@ const UserDashboard = () => {
     }
   };
 
+  if (!profileToken) {
+    return (
+      <div className="dashboard-container">
+        <p className="unauthorized-message">
+          Unauthorized: Please log in to access your dashboard.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-container">
       <UserSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        profileImage={null}
-        profileToken={profileToken}
+        user={user}
       />
       <div className="dashboard-main">
-        {renderContent()}
+        {loading ? (
+          <div className="loading-indicator">
+            <p>Loading user data...</p>
+          </div>
+        ) : (
+          renderContent()
+        )}
       </div>
     </div>
   );

@@ -1,32 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
-import logo from '../../../assets/placeholder.png';
+import logo from '../../../assets/placeholderImg.png';
 import { useNavigate } from 'react-router-dom';
 import { handleSignOut } from '../../../utils/functions';
-
-const Sidebar = ({ activeTab, setActiveTab, profileImage, profileToken }) => {
+import { getProfilePhotoUrl} from '../../../utils/images';
+const Sidebar = ({ activeTab, setActiveTab, contractor }) => {
   const navigate = useNavigate();
-  const defaultImage = logo;
-  const userImage = defaultImage || profileImage;
-const [isVisible, setIsVisible] = useState(window.innerWidth > 768);
-  const [contractor, setContractor] = useState(null);
+  const [isVisible, setIsVisible] = useState(window.innerWidth > 768);
 
-  useEffect(() => {
-    if (!profileToken) return;
-
-    const fetchContractor = async () => {
-      try {
-        const res = await fetch(`http://localhost:5050/contractors/dashboard/${profileToken}`);
-        if (!res.ok) throw new Error('Failed to fetch contractor');
-        const data = await res.json();
-        setContractor(data);
-      } catch (error) {
-        console.error('Error fetching contractor:', error);
-      }
-    };
-
-    fetchContractor();
-  }, [profileToken]);
+  // Use contractor's profile photo if available, else profileImage prop, else default logo
+  const userImage = getProfilePhotoUrl(contractor) || logo;
 
   const navItems = [
     { key: 'dashboard', label: 'Dashboard Home' },
@@ -37,6 +20,14 @@ const [isVisible, setIsVisible] = useState(window.innerWidth > 768);
     { key: 'account', label: 'Account Info' },
     { key: 'settings', label: 'App Preferences' },
   ];
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsVisible(window.innerWidth > 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleSidebar = () => {
     setIsVisible(!isVisible);
