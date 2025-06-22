@@ -24,9 +24,9 @@ function AccountInfo({ contractor }) {
     lga: '',
     area: '',
     bio: '',
-    languages: [], 
+    languages: [],
   });
-  
+
   const [errors, setErrors] = useState({});
   const [lgaOptions, setLgaOptions] = useState([]);
   const [areaSuggestions, setAreaSuggestions] = useState([]);
@@ -47,7 +47,7 @@ function AccountInfo({ contractor }) {
     { value: 'French', label: 'French' },
     { value: 'Pidgin English', label: 'Pidgin English' },
   ];
-  
+
   useEffect(() => {
     if (formData.state && stateLgas[formData.state]) {
       setLgaOptions(stateLgas[formData.state]);
@@ -62,7 +62,6 @@ function AccountInfo({ contractor }) {
 
   useEffect(() => {
     if (!contractor) return;
-  
     if (contractor.verified === true) {
       setStatus('Verified');
     } else if (contractor.applied === true) {
@@ -71,7 +70,7 @@ function AccountInfo({ contractor }) {
       setStatus('Unverified');
     }
   }, [contractor]);
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -139,24 +138,30 @@ function AccountInfo({ contractor }) {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
-    }
-
-    setErrors({});
-    setStatus('Pending'); 
+    }setErrors({});
+    setStatus('Pending');
+    
     const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => data.append(key, value));
-    data.append('transport', transport);
-    data.append('applied', true); 
+    
+    // Append non-language form data
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key !== 'languages') data.append(key, value);
+    });
+    
+    // Append languages as JSON string
     data.append('languages', JSON.stringify(formData.languages));
     
-  
-    if (contractor && contractor.user_id) {
+    // Add other fields
+    data.append('transport', transport);
+    data.append('applied', true);
+    if (contractor?.user_id) {
       data.append('user_id', contractor.user_id);
     } else {
       alert('User ID is missing. Cannot submit form.');
       return;
     }
     
+
     Object.entries(files).forEach(([key, value]) => {
       if (key === 'workSamples') {
         value.forEach((file, idx) => data.append(`workSample_${idx}`, file));
@@ -182,150 +187,114 @@ function AccountInfo({ contractor }) {
 
   return (
     <div className="kyc-container">
-      <p>
-        Upload your documents for verification. The more supporting documents you provide, the better your chances of verification.
-        Include a valid government ID, trade certificate, clear photo, reference_files (if any), proof of transport, and past work samples.
-        Ensure all info is correct.
-      </p>
-
       <div className="status">
         <strong>Status:</strong>
         <span className={`status-label ${status.toLowerCase()}`}>{status}</span>
       </div>
 
-      <form onSubmit={handleSubmit} className="kyc-form">
-        <input type="text" name="experience" placeholder="Years of Experience" value={formData.experience} onChange={handleInputChange} />
-        {errors.experience && <span className="error">{errors.experience}</span>}
+      {status === 'Unverified' && (
+        <>
+          <p>
+            Upload your documents for verification. The more supporting documents you provide, the better your chances of verification.
+          </p>
+          <form onSubmit={handleSubmit} className="kyc-form">
+            <input type="text" name="experience" placeholder="Years of Experience" value={formData.experience} onChange={handleInputChange} />
+            {errors.experience && <span className="error">{errors.experience}</span>}
 
-        <input type="text" name="workAddress" placeholder="Work Address" value={formData.workAddress} onChange={handleInputChange} />
-        {errors.workAddress && <span className="error">{errors.workAddress}</span>}
+            <input type="text" name="workAddress" placeholder="Work Address" value={formData.workAddress} onChange={handleInputChange} />
+            {errors.workAddress && <span className="error">{errors.workAddress}</span>}
 
-        <select name="state" value={formData.state} onChange={handleInputChange}>
-          <option value="">Select State of Residence</option>
-          <option value="Abuja">Abuja</option>
-          <option value="Lagos">Lagos</option>
-        </select>
-        {errors.state && <span className="error">{errors.state}</span>}
+            <select name="state" value={formData.state} onChange={handleInputChange}>
+              <option value="">Select State</option>
+              <option value="Abuja">Abuja</option>
+              <option value="Lagos">Lagos</option>
+            </select>
+            {errors.state && <span className="error">{errors.state}</span>}
 
-        <select name="lga" value={formData.lga} onChange={handleInputChange} disabled={!lgaOptions.length}>
-          <option value="">Select LGA</option>
-          {lgaOptions.map(lga => (
-            <option key={lga} value={lga}>{lga}</option>
-          ))}
-        </select>
-        {errors.lga && <span className="error">{errors.lga}</span>}
+            <select name="lga" value={formData.lga} onChange={handleInputChange}>
+              <option value="">Select LGA</option>
+              {lgaOptions.map(lga => <option key={lga} value={lga}>{lga}</option>)}
+            </select>
+            {errors.lga && <span className="error">{errors.lga}</span>}
 
-        <div className="area-input-container">
-          <input
-            type="text"
-            name="area"
-            placeholder="Type Area (e.g., Wuse, Asokoro)"
-            value={formData.area}
-            onChange={handleInputChange}
-            autoComplete="off"
-          />
-          {areaSuggestions.length > 0 && (
-            <ul className="area-suggestions">
-              {areaSuggestions.map((area, idx) => (
-                <li
-                  key={idx}
-                  onClick={() => {
-                    setFormData(prev => ({ ...prev, area }));
-                    setAreaSuggestions([]);
-                  }}
-                >
-                  {area}
-                </li>
-              ))}
-            </ul>
-          )}
+            <input type="text" name="area" placeholder="Area" value={formData.area} onChange={handleInputChange} />
+            {errors.area && <span className="error">{errors.area}</span>}
+
+            <Select
+              isMulti
+              name="languages"
+              options={languageOptions}
+              value={languageOptions.filter(o => formData.languages.includes(o.value))}
+              onChange={(selected) => setFormData(prev => ({ ...prev, languages: selected.map(o => o.value) }))}
+            />
+            {errors.languages && <span className="error">{errors.languages}</span>}
+
+            <textarea name="bio" placeholder="Short bio (max 15 words)" value={formData.bio} onChange={handleInputChange}></textarea>
+            {errors.bio && <span className="error">{errors.bio}</span>}
+
+            <select value={transport} onChange={e => setTransport(e.target.value)}>
+              <option value="">Select Transport</option>
+              <option value="bike">Bike</option>
+              <option value="car">Car</option>
+              <option value="truck">Truck</option>
+              <option value="none">None</option>
+            </select>
+              <label>
+                Upload Government-issued ID
+                <input type="file" onChange={(e) => handleFileChange(e, 'id')} />
+                {errors.id && <span className="error">{errors.id}</span>}
+              </label>
+
+              <label>
+                Upload Trade Certificate
+                <input type="file" onChange={(e) => handleFileChange(e, 'tradeCertificate')} />
+              </label>
+
+              <label>
+                Upload Personal Photo
+                <input type="file" onChange={(e) => handleFileChange(e, 'photo')} />
+                {errors.photo && <span className="error">{errors.photo}</span>}
+              </label>
+
+              <label>
+                Upload Reference Files (Optional)
+                <input type="file" onChange={(e) => handleFileChange(e, 'reference_files')} />
+              </label>
+
+              <label>
+                Upload Vehicle Proof (Optional)
+                <input type="file" onChange={(e) => handleFileChange(e, 'vehicleProof')} />
+              </label>
+
+              <label>
+                Upload Work Samples (up to 5 images)
+                <input type="file" multiple onChange={(e) => handleFileChange(e, 'workSamples')} />
+                {errors.workSamples && <span className="error">{errors.workSamples}</span>}
+              </label>
+
+              <label className="kyc-checkbox-container">
+                <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />
+                I declare all information provided is accurate.
+              </label>
+              {errors.terms && <span className="error">{errors.terms}</span>}
+
+              <button type="submit">Submit</button>
+            </form>
+
+        </>
+      )}
+
+      {status === 'Pending' && (
+        <div className="application-message">
+          <p>Your application is under review. We'll notify you once processed.</p>
         </div>
-        {errors.area && <span className="error">{errors.area}</span>}
+      )}
 
-      <div className="form-group">
-        <label htmlFor="languages">Languages Spoken (select all that apply)</label>
-        <Select
-          inputId="languages"
-          isMulti
-          name="languages"
-          options={languageOptions}
-          value={languageOptions.filter(o => formData.languages.includes(o.value))}
-          onChange={(selectedOptions) => {
-            const langs = selectedOptions.map(o => o.value);
-            setFormData(prev => ({ ...prev, languages: langs }));
-          }}
-          className="basic-multi-select"
-          classNamePrefix="select"
-          placeholder="Select languages..."
-        />
-        {errors.languages && <span className="error">{errors.languages}</span>}
-      </div>
-
-        <label htmlFor="bio">Short Bio <small>(max 15 words)</small></label>
-        <textarea
-          id="bio"
-          name="bio"
-          placeholder="e.g., Experienced mechanic with 10+ years of service in Abuja."
-          value={formData.bio}
-          onChange={handleInputChange}
-          rows={3}
-        />
-        {errors.bio && <span className="error">{errors.bio}</span>}
-
-        <select value={transport} onChange={e => setTransport(e.target.value)}>
-          <option value="">Select Mode of Transport</option>
-          <option value="bike">Bike</option>
-          <option value="car">Car</option>
-          <option value="truck">Truck</option>
-          <option value="none">None</option>
-        </select>
-
-        <label>
-          Upload Government-issued ID
-          <input type="file" onChange={(e) => handleFileChange(e, 'id')} />
-          {errors.id && <span className="error">{errors.id}</span>}
-        </label>
-
-        <label>
-          Upload Trade Certificate
-          <input type="file" onChange={(e) => handleFileChange(e, 'tradeCertificate')} />
-        </label>
-
-        <label>
-          Upload Personal Photo
-          <input type="file" onChange={(e) => handleFileChange(e, 'photo')} />
-          {errors.photo && <span className="error">{errors.photo}</span>}
-        </label>
-
-        <label>
-          Upload References (Optional)
-          <input type="file" onChange={(e) => handleFileChange(e, 'reference_files')} />
-        </label>
-
-        <label>
-          Upload Vehicle Proof (Optional)
-          <input type="file" onChange={(e) => handleFileChange(e, 'vehicleProof')} />
-        </label>
-
-        <label>
-          Upload Work Samples (up to 5 images)
-          <input type="file" multiple onChange={(e) => handleFileChange(e, 'workSamples')} />
-          {errors.workSamples && <span className="error">{errors.workSamples}</span>}
-        </label>
-
-        <label className="kyc-checkbox-container">
-        <input 
-          className="kyc-checkbox" 
-          type="checkbox" 
-          checked={termsAccepted} 
-          onChange={(e) => setTermsAccepted(e.target.checked)} 
-        />
-        I hereby declare that all information provided is accurate to the best of my knowledge.
-      </label>
-      {errors.terms && <span className="error">{errors.terms}</span>}
-
-        <button type="submit">Submit for validation</button>
-      </form>
+      {status === 'Verified' && (
+        <div className="application-message">
+          <p>Your account has been verified. Thank you!</p>
+        </div>
+      )}
     </div>
   );
 }

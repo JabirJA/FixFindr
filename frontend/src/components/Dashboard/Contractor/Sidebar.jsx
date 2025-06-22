@@ -9,7 +9,8 @@ const Sidebar = ({ activeTab, setActiveTab, contractor }) => {
   const [isVisible, setIsVisible] = useState(window.innerWidth > 768);
 
   // Use contractor's profile photo if available, else profileImage prop, else default logo
-  const userImage = getProfilePhotoUrl(contractor) || logo;
+  const userImage = getProfilePhotoUrl(contractor);
+
 
   const navItems = [
     { key: 'dashboard', label: 'Dashboard Home' },

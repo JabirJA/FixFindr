@@ -54,7 +54,7 @@ const ContractorDashboard = () => {
       case 'analytics':
         return <CAnalytics />;
       case 'availability':
-        return <Availability />;
+        return <Availability contractor={contractor}/>;
       default:
         return <DashboardHome />;
     }

@@ -5,11 +5,12 @@ import logo3 from '../assets/placeholderImg.png';  // adjust path as needed
  * @returns {string} - The full URL to the image or fallback image.
  */
 export function getProfilePhotoUrl(matched) {
-  if (matched.profile_photo) {
-    return `http://localhost:5050/${matched.profile_photo}`;
+    if (matched?.profile_photo) {
+      return `http://localhost:5050/${matched.profile_photo}`;
+    }
+    return logo3;
   }
-  return  logo3;
-}
+  
 
 /**
  * Get the array of full URLs for contractor's past work photos.

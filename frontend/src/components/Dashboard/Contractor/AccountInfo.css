@@ -281,4 +281,6 @@
     margin: 0;
   }
   
-  
+  .application-message {
+    text-align: center;
+  }

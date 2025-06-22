@@ -51,8 +51,7 @@ const ContractorProfilePage = () => {
             services: matched.services || [],
             gallery: matched.gallery || [],
             reviews: matched.reviews || [],
-            availability: matched.availability || {},
-            isAvailable: matched.is_available ?? false,
+            availability: matched.availability || false,
             location: matched.location || {
               address: 'Not specified',
               mapEmbedUrl: ''
@@ -95,7 +94,6 @@ const ContractorProfilePage = () => {
     gallery,
     reviews,
     availability,
-    isAvailable,
     location,
     phone,
     email
@@ -116,8 +114,8 @@ const ContractorProfilePage = () => {
           <p className="contractor-services-summary">{services.map(s => s.name).join(', ')}</p>
           <StarRatings rating={rating} />
           <h2 className="availability-heading">
-            <span className={isAvailable ? 'available' : 'unavailable'}>
-              {isAvailable ? 'Available' : 'Unavailable'}
+            <span className={availability ? 'available' : 'unavailable'}>
+              {availability ? 'Available' : 'Unavailable'}
               <p className="distance-info">3 km away</p>
             </span>
           </h2>
@@ -127,7 +125,7 @@ const ContractorProfilePage = () => {
           <button className="btn chat-btn">Chat with {first_name}</button>
         </div>
       </div>
-      {!contractor.isAvailable && (
+      {!contractor.availability && (
       <p className="unavailable-note">
         {first_name} is currently unavailable for immediate bookings. You can still schedule a future appointment.
       </p>
@@ -190,23 +188,6 @@ const ContractorProfilePage = () => {
           ))}
         </select>
       </div>
-
-      <section className="map-section">
-        <h2>Location</h2>
-        <p>{location.address}</p>
-        {location.mapEmbedUrl ? (
-          <iframe
-            src={location.mapEmbedUrl}
-            height="300"
-            allowFullScreen=""
-            loading="lazy"
-            title="Contractor Location"
-            className="map-iframe"
-          ></iframe>
-        ) : (
-          <p>Map not available.</p>
-        )}
-      </section>
     </div>
   );
 };

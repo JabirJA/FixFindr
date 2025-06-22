@@ -4,7 +4,7 @@ const pool = require('../db');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-
+const fsPromises = fs.promises;
 // Multer setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -287,8 +287,9 @@ router.put('/:contractorId/verify', async (req, res) => {
       res.status(500).json({ error: 'Server error' });
     }
   });
-  // DELETE //contractors/:id
-router.delete('/:id', async (req, res) => {
+  
+  // DELETE /contractors/:id
+  router.delete('/:id', async (req, res) => {
     const { id } = req.params;
   
     if (isNaN(id)) {
@@ -296,7 +297,7 @@ router.delete('/:id', async (req, res) => {
     }
   
     try {
-      // Optionally: Fetch contractor info to delete associated files later
+      // Fetch contractor info
       const contractorResult = await pool.query(
         'SELECT * FROM contractors WHERE contractor_id = $1',
         [id]
@@ -314,27 +315,30 @@ router.delete('/:id', async (req, res) => {
         [id]
       );
   
-      // Cleanup files (if you want to remove uploaded files too)
+      // Collect all file paths
       const filePaths = [
         contractor.government_id_photo,
         contractor.trade_certificate,
         contractor.profile_photo,
         contractor.vehicle_proof,
         contractor.reference_files,
-        ...(contractor.past_work_photos ? contractor.past_work_photos.split(',') : [])
+        ...(Array.isArray(contractor.past_work_photos) ? contractor.past_work_photos : [])
       ];
   
-      filePaths.forEach(filePath => {
-        if (filePath && fs.existsSync(filePath)) {
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              console.error(`Failed to delete file: ${filePath}`, err);
-            } else {
-              console.log(`Deleted file: ${filePath}`);
+      // Attempt to delete each file
+      for (const filePath of filePaths) {
+        if (filePath) {
+          const resolvedPath = path.resolve(filePath); // optional: enforce absolute path
+          if (fs.existsSync(resolvedPath)) {
+            try {
+              await fsPromises.unlink(resolvedPath);
+              console.log(`Deleted file: ${resolvedPath}`);
+            } catch (err) {
+              console.error(`Failed to delete file: ${resolvedPath}`, err);
             }
-          });
+          }
         }
-      });
+      }
   
       res.json({ message: 'Contractor removed successfully' });
   
@@ -344,4 +348,110 @@ router.delete('/:id', async (req, res) => {
     }
   });
   
+  // POST /contractors/update-availability
+router.post('/update-availability', async (req, res) => {
+  const { user_id, availability } = req.body;
+
+  if (!user_id || typeof availability !== 'boolean') {
+    return res.status(400).json({ error: 'Missing or invalid user_id or availability' });
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE contractors
+       SET availability = $1, updated_at = CURRENT_TIMESTAMP
+       WHERE user_id = $2
+       RETURNING *`,
+      [availability, user_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Contractor not found' });
+    }
+
+    res.json({ message: 'Availability updated', contractor: result.rows[0] });
+  } catch (err) {
+    console.error('Error updating availability:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/save-availability-slots', async (req, res) => {
+  const { user_id, slots } = req.body;
+
+  if (!user_id || !Array.isArray(slots)) {
+    return res.status(400).json({ error: 'Invalid data' });
+  }
+
+  try {
+    const contractorRes = await pool.query(
+      'SELECT contractor_id FROM contractors WHERE user_id = $1 LIMIT 1',
+      [user_id]
+    );
+    const contractorId = contractorRes.rows[0]?.contractor_id;
+    if (!contractorId) return res.status(404).json({ error: 'Contractor not found' });
+
+    const values = slots.map(s => [s.day, s.hour, contractorId]);
+
+    const insertQuery = `
+      INSERT INTO contractor_availability (day, hour, contractor_id)
+      VALUES ${values.map((_, i) => `($${i * 3 + 1}, $${i * 3 + 2}, $${i * 3 + 3})`).join(', ')}
+      ON CONFLICT (day, hour, contractor_id) DO NOTHING
+    `;
+
+    const flatValues = values.flat();
+    await pool.query(insertQuery, flatValues);
+
+    res.json({ message: 'Availability slots saved successfully' });
+  } catch (err) {
+    console.error('Error saving slots:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/get-availability-slots/:user_id', async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    const contractorRes = await pool.query(
+      'SELECT contractor_id FROM contractors WHERE user_id = $1 LIMIT 1',
+      [user_id]
+    );
+    const contractorId = contractorRes.rows[0]?.contractor_id;
+    if (!contractorId) return res.status(404).json({ error: 'Contractor not found' });
+
+    const slotsRes = await pool.query(
+      'SELECT day, hour FROM contractor_availability WHERE contractor_id = $1',
+      [contractorId]
+    );
+
+    res.json(slotsRes.rows); // returns [{ day: 'Monday', hour: 9 }, ...]
+  } catch (err) {
+    console.error('Error fetching slots:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+router.post('/delete-availability-slot', async (req, res) => {
+  const { user_id, day, hour } = req.body;
+
+  try {
+    const contractorRes = await pool.query(
+      'SELECT contractor_id FROM contractors WHERE user_id = $1 LIMIT 1',
+      [user_id]
+    );
+    const contractorId = contractorRes.rows[0]?.contractor_id;
+    if (!contractorId) return res.status(404).json({ error: 'Contractor not found' });
+
+    await pool.query(
+      'DELETE FROM contractor_availability WHERE contractor_id = $1 AND day = $2 AND hour = $3',
+      [contractorId, day, hour]
+    );
+
+    res.json({ message: 'Slot deleted' });
+  } catch (err) {
+    console.error('Error deleting slot:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
