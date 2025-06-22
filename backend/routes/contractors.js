@@ -228,8 +228,8 @@ router.put('/:id', async (req, res) => {
   }
 
   const fields = [
-    'service_type', 'city', 'state', 'age', 'nin', 'trade_certificate',
-    'government_id_photo', 'past_work_photos', 'languages', 'intro_text',
+    'service_type', 'state', 'age', 'nin', 'trade_certificate',
+    'government_id_photo', 'past_work_photos', 'languages',
     'experience', 'profile_photo', 'means_of_transport', 'bvn',
     'residential_address', 'lga', 'phone_number'
   ];
@@ -451,6 +451,20 @@ router.post('/delete-availability-slot', async (req, res) => {
   } catch (err) {
     console.error('Error deleting slot:', err);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/availability/:contractorId', async (req, res) => {
+  const contractorId = req.params.contractorId;
+  try {
+    const result = await pool.query(
+      `SELECT day, hour FROM contractor_availability WHERE contractor_id = $1 ORDER BY day, hour`,
+      [contractorId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch availability' });
   }
 });
 
