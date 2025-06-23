@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import './Checkout.css';
 import logo2 from '../../assets/man.png';
 import { handleShareLocation, isValidPhone } from '../../utils/location';
-import { getProfilePhotoUrl} from '../../utils/images';
+import { getProfilePhotoUrl } from '../../utils/images';
+import axios from 'axios';
+import { formatRelativeTime } from '../../utils/dateutils';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-routing-machine';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+
 const Checkout = () => {
   const location = useLocation();
   const contractor = location.state?.contractor;
@@ -19,7 +26,12 @@ const Checkout = () => {
   const [stateInput, setStateInput] = useState('');
   const [areaInput, setAreaInput] = useState('');
   const [streetInput, setStreetInput] = useState('');
-  const isUnavailable = contractor.status === 'unavailable';
+  const [availability, setAvailability] = useState([]);
+  const [userCoords, setUserCoords] = useState(null);
+
+  const mapRef = useRef(null);
+  const routingRef = useRef(null);
+  const markersRef = useRef([]);
 
   const areaOptions = {
     Abuja: ["Wuse", "Asokoro", "Maitama", "Garki", "Gwarinpa", "Kuje", "Airport Road", "Lokogoma", "Kubwa", "Lugbe", "Jabi", "Utako", "Durumi", "Gudu"],
@@ -28,24 +40,20 @@ const Checkout = () => {
 
   const basePrice = 5500;
   const serviceFee = 300;
-  const surcharges = {
-    Priority: 2000,
-    Fast: 1000,
-    Scheduled: 0,
-  };
+  const surcharges = { Priority: 2000, Fast: 1000, Scheduled: 0 };
+
+  const now = new Date();
+  const formatOptions = { hour: 'numeric', minute: '2-digit' };
+
+  const priorityStartStr = new Date(now.getTime() + 15 * 60 * 1000).toLocaleTimeString([], formatOptions);
+  const priorityEndStr = new Date(now.getTime() + 45 * 60 * 1000).toLocaleTimeString([], formatOptions);
+  const fastStartStr = new Date(now.getTime() + 50 * 60 * 1000).toLocaleTimeString([], formatOptions);
+  const fastEndStr = new Date(now.getTime() + 90 * 60 * 1000).toLocaleTimeString([], formatOptions);
 
   const bookingOptions = [
-    { id: 'Priority', label: 'Priority', time: '5:08 PM - 5:53 PM Today', price: 7000 },
-    { id: 'Fast', label: 'Fast', time: '6:30 PM - 7:15 PM Today', price: 6000 },
-    { id: 'Scheduled', label: 'Schedule & Save', time: 'As soon as 9:00 AM Tomorrow', price: 5500 },
-  ];
-
-  const scheduleOptions = [
-    'Tomorrow 9:00 AM',
-    'Tomorrow 11:00 AM',
-    'Day after tomorrow 2:00 PM',
-    'In 3 days 10:00 AM',
-    'In 4 days 1:00 PM'
+    { id: 'Priority', label: 'Priority', time: `${priorityStartStr} - ${priorityEndStr} Today`, price: 7000 },
+    { id: 'Fast', label: 'Fast', time: `${fastStartStr} - ${fastEndStr} Today`, price: 6000 },
+    { id: 'Scheduled', label: 'Schedule & Save', time: 'As soon as next available', price: 5500 }
   ];
 
   const total = basePrice + serviceFee + (surcharges[bookingTime] || 0);
@@ -73,6 +81,101 @@ const Checkout = () => {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    if (bookingTime === 'Scheduled' && contractor?.contractor_id) {
+      axios.get(`http://localhost:5050/contractors/availability/${contractor.contractor_id}`)
+        .then(res => setAvailability(res.data))
+        .catch(err => console.error('Error fetching availability:', err));
+    }
+  }, [bookingTime, contractor]);
+  useEffect(() => {
+   
+    if (!mapRef.current) {
+      mapRef.current = L.map('map').setView([9.05785, 7.49508], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(mapRef.current);
+    }
+  
+    if (
+      userCoords && userCoords.length === 2 &&
+      contractor?.latitude !== undefined && contractor?.longitude !== undefined
+    ) {
+      // Remove existing markers
+      markersRef.current.forEach(marker => mapRef.current.removeLayer(marker));
+      markersRef.current = [];
+  
+      if (routingRef.current) {
+        mapRef.current.removeControl(routingRef.current);
+        routingRef.current = null;
+      }
+  
+      // Add user marker
+      const userMarker = L.marker(userCoords).addTo(mapRef.current).bindPopup('Your Location').openPopup();
+      markersRef.current.push(userMarker);
+  
+      // Add contractor marker
+      const contractorMarker = L.marker([contractor.latitude, contractor.longitude]).addTo(mapRef.current).bindPopup(contractor.name);
+      markersRef.current.push(contractorMarker);
+  
+      // Add route
+      routingRef.current = L.Routing.control({
+        waypoints: [
+          L.latLng(userCoords[0], userCoords[1]),
+          L.latLng(contractor.latitude, contractor.longitude)
+        ],
+        routeWhileDragging: false,
+        addWaypoints: false,
+        show: false
+      }).addTo(mapRef.current);
+      
+      // Center the map
+      mapRef.current.fitBounds([
+        [userCoords[0], userCoords[1]],
+        [contractor.latitude, contractor.longitude]
+      ]);
+    }
+  }, [userCoords, contractor]);
+  
+  const handleLocationShare = () => {
+    handleShareLocation((coords) => {
+      
+      if (coords && coords.lat && coords.lng) {
+        setUserCoords([coords.lat, coords.lng]);
+        setStateInput('');
+        setAreaInput('');
+        setStreetInput('');
+      } else {
+        console.error(' Invalid coords:', coords);
+      }
+      
+    });
+  };
+  
+
+  const handleGeocodeAddress = async () => {
+    if (!stateInput || !areaInput || !streetInput) {
+      alert('Please fill State, Area, and Street before locating');
+      return;
+    }
+    const query = encodeURIComponent(`${streetInput}, ${areaInput}, ${stateInput}, Nigeria`);
+    const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.length > 0) {
+        const { lat, lon } = data[0];
+        setUserCoords([parseFloat(lat), parseFloat(lon)]);
+        alert('Address located on map!');
+      } else {
+        alert('Unable to locate address.');
+      }
+    } catch (err) {
+      console.error('Geocoding error:', err);
+      alert('Error locating address.');
+    }
+  };
+
   const openModal = (title) => {
     setModalTitle(title);
     fetch(`/terms/${title === 'Terms & Conditions' ? 'user-terms.txt' : 'cancellation.txt'}`)
@@ -87,19 +190,11 @@ const Checkout = () => {
       alert('Please enter a valid Nigerian phone number');
       return;
     }
-    if (!stateInput || !areaInput || !streetInput) {
-      alert('Please fill out State, Area, and Street Address');
+    if (!stateInput && !userCoords) {
+      alert('Please fill out State, Area, and Street Address or share location');
       return;
     }
     alert('Booking submitted!');
-  };
-
-  const handleLocationShare = () => {
-    handleShareLocation(() => {
-      setStateInput('Abuja');
-      setAreaInput('Gwarinpa');
-      setStreetInput('12 Aminu Kano Crescent');
-    });
   };
 
   if (!contractor) {
@@ -111,7 +206,7 @@ const Checkout = () => {
       <h2 className="checkout-title">Checkout</h2>
 
       <div className="contractor-summary">
-        <img src={getProfilePhotoUrl(contractor)} alt="Contractor" className="contractor-photo" />
+        <img src={getProfilePhotoUrl(contractor) || logo2} alt="Contractor" className="contractor-photo" />
         <div>
           <h3>{contractor.name}</h3>
           <p>{contractor.services?.map(s => s.name).join(', ')}</p>
@@ -122,14 +217,12 @@ const Checkout = () => {
         <label className="section-label">Choose Appointment Time:</label>
         <div className="booking-cards">
           {bookingOptions.map((opt) => {
-            const disabled = !contractor.isAvailable && opt.id !== 'Scheduled';
+            const disabled = !contractor.availability && opt.id !== 'Scheduled';
             return (
               <div
                 key={opt.id}
                 className={`booking-card ${bookingTime === opt.id ? 'selected' : ''} ${disabled ? 'disabled' : ''}`}
-                onClick={() => {
-                  if (!disabled) setBookingTime(opt.id);
-                }}
+                onClick={() => { if (!disabled) setBookingTime(opt.id); }}
               >
                 <div className="booking-info">
                   <h4>{opt.label}</h4>
@@ -143,33 +236,34 @@ const Checkout = () => {
 
         {bookingTime === 'Scheduled' && (
           <div className="schedule-dropdown">
-            <label htmlFor="scheduledDate">Pick a time:</label>
+            <label htmlFor="scheduledDate" className="scheduled-label">Pick a time:</label>
             <select
               id="scheduledDate"
               value={scheduledDate}
               onChange={(e) => setScheduledDate(e.target.value)}
             >
               <option value="">Select a time</option>
-              {scheduleOptions.map((time, i) => (
-                <option key={i} value={time}>
-                  {time}
-                </option>
-              ))}
+              {availability.map((slot, i) => {
+                const label = formatRelativeTime(slot.day, slot.hour);
+                if (!label) return null;
+                return (
+                  <option key={i} value={`${slot.day} ${slot.hour}`}>
+                    {label}
+                  </option>
+                );
+              })}
             </select>
           </div>
         )}
       </div>
 
       <section className="map-section">
-        <h3>Service Location</h3>
-        <p>{contractor.location?.address || '12 Aminu St, Ibadan'}</p>
-        <iframe
-          src={contractor.location?.mapEmbed || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3975.9197299327824!2d3.895393714755193!3d7.377535994675872!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1039ecfe0b260beb%3A0x7b5475ae7b556927!2s12%20Aminu%20St%2C%20Ibadan!5e0!3m2!1sen!2sng!4v1682047303036!5m2!1sen!2sng"}
-          height="300"
-          loading="lazy"
-          title="Contractor Location"
-          className="map-iframe"
-        ></iframe>
+        <h3>Service Route Map</h3>
+        {!userCoords && <p>Share your location or locate by address to view route.</p>}
+        
+        <button onClick={handleLocationShare}>Share Current Location</button>
+        <button onClick={handleGeocodeAddress}>Locate with Address</button>
+        <div id="map"></div>
       </section>
 
       <section className="checkout-booking-details">
@@ -184,12 +278,7 @@ const Checkout = () => {
         </div>
         <div className="booking-detail-row">
           <label>Phone:</label>
-          <input 
-            type="tel"
-            value={phoneInput}
-            onChange={e => setPhoneInput(e.target.value)}
-            placeholder="e.g. 08012345678"
-          />
+          <input type="tel" value={phoneInput} onChange={e => setPhoneInput(e.target.value)} placeholder="e.g. 08012345678" />
         </div>
         <div className="booking-detail-row">
           <label>State:</label>
@@ -201,7 +290,7 @@ const Checkout = () => {
         </div>
         <div className="booking-detail-row">
           <label>Area:</label>
-          <input 
+          <input
             list="area-list"
             value={areaInput}
             onChange={e => setAreaInput(e.target.value)}
@@ -216,16 +305,7 @@ const Checkout = () => {
         </div>
         <div className="booking-detail-row">
           <label>Street Address:</label>
-          <input 
-            type="text"
-            value={streetInput}
-            onChange={e => setStreetInput(e.target.value)}
-            placeholder="Enter street address"
-          />
-        </div>
-        <div className="booking-detail-row">
-          <label>Location Share:</label>
-          <button onClick={handleLocationShare}>Share Current Location</button>
+          <input type="text" value={streetInput} onChange={e => setStreetInput(e.target.value)} placeholder="Enter street address" />
         </div>
       </section>
 
@@ -257,10 +337,10 @@ const Checkout = () => {
 
       <p className="checkout-terms">
         By confirming, you agree to our{' '}
-        <a href="#!" onClick={(e) => { e.preventDefault(); openModal('Terms & Conditions'); }}>
+        <a href="#!" onClick={e => { e.preventDefault(); openModal('Terms & Conditions'); }}>
           Terms & Conditions
         </a> and{' '}
-        <a href="#!" onClick={(e) => { e.preventDefault(); openModal('Cancellation Policy'); }}>
+        <a href="#!" onClick={e => { e.preventDefault(); openModal('Cancellation Policy'); }}>
           Cancellation Policy
         </a>.
       </p>

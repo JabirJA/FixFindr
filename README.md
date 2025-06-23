@@ -1,82 +1,106 @@
- <div className="service">🛢️ Gas Delivery</div>
-          <div className="service">🧊 Refrigerator/Freezer Repair</div>
-          <div className="service">🐜 Pest Control</div>
-          <div className="service">🚰 Water Tanker Delivery</div>
-          <div className="service">🔆 Inverter/Solar Technician</div>
-          <div className="service">🎨 House Painting</div>
-          <div className="service">🧹 House Cleaning</div>
-          <div className="service">📷 CCTV Installation</div>
-          <div className="service">🛠️ Handyman</div>
+Here’s an updated **README.md** draft that reflects **Fix Finder's current architecture (PostgreSQL, Express, React)**, your current/planned features, and correct tooling!
+
+---
 
 # 🛠️ Fix Finder
 
-Fix Finder is an on-demand home repair and contractor booking platform built with the MERN stack. It connects users with verified local contractors for repairs, installations, and general services, enabling secure bookings, communication, and payments.
+Fix Finder is an on-demand home repair and contractor booking platform built with the **React + Express + PostgreSQL** stack. It connects users with verified local contractors for repairs, installations, and services, supporting secure bookings, communication, and payments.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-
 fix-finder/
 ├── fix-finder-frontend/      // React Frontend
-├── fix-finder-backend/       // Express + MySQL Backend
+├── fix-finder-backend/       // Express + PostgreSQL Backend
 ├── docs/                     // API docs, workflows
 ├── .gitignore
 └── README.md
+```
 
-````
+---
 
 ## 🚀 Tech Stack
 
-| Frontend         | Backend               | Other Tools             |
-|------------------|------------------------|--------------------------|
-| React            | Node.js + Express      | MySQL (Mongoose)      |
-| CSS              | JWT Authentication     | Paystack (Payments)     |
-| React Router     | RESTful APIs           | Cloudinary (Media)      |
-| Axios            | Bcrypt                 | Dotenv                  |
-| React Context    | Validation (Joi/Zod)   | Postman (Testing)       |
+| Frontend      | Backend            | Other Tools           |
+| ------------- | ------------------ | --------------------- |
+| React         | Node.js + Express  | PostgreSQL            |
+| CSS / SCSS    | JWT Authentication | Paystack (Payments)   |
+| React Router  | RESTful APIs       | Cloudinary (Media)    |
+| Axios         | Bcrypt             | Dotenv                |
+| React Context | Joi (Validation)   | Postman (API Testing) |
 
 ---
 
 ## 🧭 Features (MVP)
 
-- 👤 User & Contractor registration/login (JWT auth)
-- 📆 Booking system with contractor pricing
-- ✅ Contractor availability toggle
-- 🛠️ Booking approval, proof upload, and payment verification
-- 💳 Integrated payments (via Paystack)
-- 🛡️ Admin dashboard for complaints and booking oversight
+✅ **Implemented**
+
+* 👤 User & Contractor registration/login (JWT-based auth)
+* 📆 Booking system with contractor pricing
+* ✅ Contractor availability management
+* 🛠️ Proof of job completion upload
+* 💳 Integrated Paystack payment workflow
+* 🛡️ Admin dashboard for contractor management
+
+🚧 **Planned / In Progress**
+
+* 💬 User-Contractor messaging system
+* ✉️ Email & SMS notifications
+* ⭐ Ratings & reviews system
+* 📊 Admin analytics dashboard
+* 📱 Mobile app (React Native)
+
+---
+
+## 📌 Available Services
+
+```
+🛢️ Gas Delivery  
+🧊 Refrigerator/Freezer Repair  
+🐜 Pest Control  
+🚰 Water Tanker Delivery  
+🔆 Inverter/Solar Technician  
+🎨 House Painting  
+🧹 House Cleaning  
+📷 CCTV Installation  
+🛠️ Handyman  
+```
 
 ---
 
 ## 🌐 API Endpoints (Sample)
 
-**Base URL**: `http://localhost:5000/api`
+**Base URL:** `http://localhost:5050/api`
 
 ### 🔐 Auth
-| Method | Endpoint         | Description               |
-|--------|------------------|---------------------------|
-| POST   | /auth/register   | Register user/contractor  |
-| POST   | /auth/login      | Login and get token       |
+
+| Method | Endpoint       | Description              |
+| ------ | -------------- | ------------------------ |
+| POST   | /auth/register | Register user/contractor |
+| POST   | /auth/login    | Login + receive token    |
 
 ### 👤 User
-| Method | Endpoint         | Description              |
-|--------|------------------|--------------------------|
-| GET    | /user/me         | Get current user profile |
-| GET    | /user/bookings   | List all user bookings   |
+
+| Method | Endpoint       | Description              |
+| ------ | -------------- | ------------------------ |
+| GET    | /user/me       | Get current user profile |
+| GET    | /user/bookings | Get user bookings        |
 
 ### 🛠️ Contractor
-| Method | Endpoint                     | Description                      |
-|--------|------------------------------|----------------------------------|
-| PATCH  | /contractor/available        | Toggle availability              |
-| POST   | /contractor/job-complete/:id | Upload completion proof          |
+
+| Method | Endpoint                      | Description                    |
+| ------ | ----------------------------- | ------------------------------ |
+| PATCH  | /contractor/available         | Toggle contractor availability |
+| POST   | /contractor/job-complete/\:id | Upload job completion proof    |
 
 ### 📆 Booking
-| Method | Endpoint              | Description                           |
-|--------|-----------------------|---------------------------------------|
-| POST   | /bookings             | Create a new booking                  |
-| PATCH  | /bookings/:id/confirm | Confirm and pay after final price     |
+
+| Method | Endpoint               | Description                |
+| ------ | ---------------------- | -------------------------- |
+| POST   | /bookings              | Create a new booking       |
+| PATCH  | /bookings/\:id/confirm | Confirm + finalize payment |
 
 ---
 
@@ -84,9 +108,9 @@ fix-finder/
 
 ### 🔧 Prerequisites
 
-- Node.js (v18+)
-- MongoDB (local or Atlas)
-- Paystack Developer Account
+* Node.js (v18+ recommended)
+* PostgreSQL (local or cloud instance)
+* Paystack developer account
 
 ---
 
@@ -95,9 +119,9 @@ fix-finder/
 ```bash
 cd fix-finder-backend
 npm install
-cp .env.example .env  # Fill in Mongo URI, JWT_SECRET, etc.
+cp .env.example .env   # Fill in POSTGRES_URI, JWT_SECRET, PAYSTACK_KEY, etc.
 npm run dev
-````
+```
 
 ---
 
@@ -113,9 +137,9 @@ npm run dev
 
 ## 📌 Roadmap
 
-* [ ] User-Contractor messaging system
-* [ ] Email/SMS notifications
-* [ ] Ratings & Reviews system
+* [ ] User-contractor messaging system
+* [ ] Ratings & reviews
+* [ ] SMS/email notifications
 * [ ] Admin analytics dashboard
 * [ ] Mobile app (React Native)
 
@@ -123,13 +147,11 @@ npm run dev
 
 ## 🧑‍💻 Author
 
-**Fix Finder Project** by \[Your Name]
-🚀 Built for contractors and customers in the digital era.
+**Fix Finder Project**
+🚀 Built for connecting customers with trusted contractors.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
-
-```
+This project is licensed under the **MIT License**.

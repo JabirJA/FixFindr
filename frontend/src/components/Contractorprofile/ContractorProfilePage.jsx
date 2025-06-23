@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './ContractorProfilePage.css';
 import { getProfilePhotoUrl, getPastWorkPhotoUrls } from '../../utils/images';
+import { formatRelativeTime } from '../../utils/dateutils';
+import axios from 'axios';
+import { getDistanceFromLatLonInKm, fetchCoordinates } from '../../utils/location';
 
 const StarRatings = ({ rating }) => {
   const fullStars = Math.floor(rating);
@@ -25,9 +28,10 @@ const StarRatings = ({ rating }) => {
 const ContractorProfilePage = () => {
   const { name } = useParams();
   const navigate = useNavigate();
-
+  const [available, setAvailability] = useState([]);
   const [contractor, setContractor] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [distance, setDistance] = useState(null);
 
   useEffect(() => {
     const fetchContractor = async () => {
@@ -36,8 +40,7 @@ const ContractorProfilePage = () => {
         if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
         const data = await res.json();
 
-        // Match contractor by combined lowercase name
-        const matched = data.find(c => 
+        const matched = data.find(c =>
           `${c.first_name}${c.last_name}`.toLowerCase() === name.toLowerCase()
         );
 
@@ -52,21 +55,16 @@ const ContractorProfilePage = () => {
             gallery: matched.gallery || [],
             reviews: matched.reviews || [],
             availability: matched.availability || false,
-            location: matched.location || {
-              address: 'Not specified',
-              mapEmbedUrl: ''
-            },
             languages: matched.languages || 'English',
             experience: matched.experience || 0,
             phone: matched.phone || 'N/A',
             email: matched.email || 'N/A'
           };
-        
+
           setContractor(enriched);
         } else {
           setContractor(null);
         }
-        
 
       } catch (error) {
         console.error('❌ Error fetching contractor:', error);
@@ -78,14 +76,78 @@ const ContractorProfilePage = () => {
     fetchContractor();
   }, [name]);
 
-  if (loading) return <p>Loading contractor profile...</p>;
+  useEffect(() => {
+    if (!contractor?.contractor_id) return;
 
+    axios.get(`http://localhost:5050/contractors/availability/${contractor.contractor_id}`)
+      .then(res => setAvailability(res.data))
+      .catch(err => console.error('Error fetching availability:', err));
+  }, [contractor]);
+
+  useEffect(() => {
+    const computeDistance = async () => {
+      if (!contractor) return;
+
+      if (!navigator.geolocation) {
+        console.warn("Geolocation is not supported by this browser.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const userLat = position.coords.latitude;
+        const userLon = position.coords.longitude;
+
+        try {
+          let contractorLat = contractor.location?.latitude;
+          let contractorLon = contractor.location?.longitude;
+          if (!contractorLat || !contractorLon) {
+            const locationStr = `${contractor.area}, ${contractor.lga}, ${contractor.state}, Nigeria`;
+            const coords = await fetchCoordinates(locationStr);
+            contractorLat = coords.lat;
+            contractorLon = coords.lng;
+          
+            // Build a fresh contractor object
+            const enrichedContractor = {
+              ...contractor,
+              location: {
+                ...contractor.location,
+                latitude: contractorLat,
+                longitude: contractorLon
+              },
+              latitude: contractorLat,
+              longitude: contractorLon,
+            };
+          
+            setContractor(enrichedContractor);
+          }
+          
+
+          if (contractorLat && contractorLon) {
+            const dist = getDistanceFromLatLonInKm(
+              userLat,
+              userLon,
+              contractorLat,
+              contractorLon
+            );
+            setDistance(dist.toFixed(2));
+          }
+        } catch (err) {
+          console.error("Error computing distance:", err);
+        }
+      }, (error) => {
+        console.error("Error getting user location:", error);
+      });
+    };
+
+    computeDistance();
+  }, [contractor]);
+
+  if (loading) return <p>Loading contractor profile...</p>;
   if (!contractor) return <div className="not-found">Contractor not found.</div>;
 
   const {
     first_name,
     last_name,
-    image,
     rating,
     bio,
     experience,
@@ -94,9 +156,7 @@ const ContractorProfilePage = () => {
     gallery,
     reviews,
     availability,
-    location,
-    phone,
-    email
+    pastWorkPhotoUrls
   } = contractor;
 
   const handleHireClick = () => {
@@ -107,29 +167,34 @@ const ContractorProfilePage = () => {
   return (
     <div className="contractor-profile-container">
       <div className="contractor-main-card">
-
-    <img className="contractorimage" src={contractor.profilePhotoUrl} alt="Profile Photo" />
+        <img className="contractorimage" src={contractor.profilePhotoUrl} alt="Profile Photo" />
         <div className="contractor-info">
           <h1 className="contractor-name">{first_name} {last_name}</h1>
-          <p className="contractor-services-summary">{services.map(s => s.name).join(', ')}</p>
+          {contractor.service_type && (
+            <h3 className="contractor-service-type">{contractor.service_type}</h3>
+          )}
           <StarRatings rating={rating} />
           <h2 className="availability-heading">
             <span className={availability ? 'available' : 'unavailable'}>
               {availability ? 'Available' : 'Unavailable'}
-              <p className="distance-info">3 km away</p>
             </span>
+            <p className="distance-info">
+              {distance ? `${distance} km away` : 'Distance unknown'}
+            </p>
           </h2>
+
           <button className="btn book-btn" onClick={handleHireClick}>
             Hire {first_name}
           </button>
           <button className="btn chat-btn">Chat with {first_name}</button>
         </div>
       </div>
-      {!contractor.availability && (
-      <p className="unavailable-note">
-        {first_name} is currently unavailable for immediate bookings. You can still schedule a future appointment.
-      </p>
-    )}
+
+      {!availability && (
+        <p className="unavailable-note">
+          {first_name} is currently unavailable for immediate bookings. You can still schedule a future appointment.
+        </p>
+      )}
 
       <section className="about-section">
         <h2>About This Contractor</h2>
@@ -162,30 +227,40 @@ const ContractorProfilePage = () => {
           <p>No reviews yet.</p>
         )}
       </section>
-      <section className="gallery-section">
-  <h2>Past Work</h2>
-  <div className="gallery img">
-    {contractor && contractor.pastWorkPhotoUrls && contractor.pastWorkPhotoUrls.length > 0 ? (
-      contractor.pastWorkPhotoUrls.map((url, idx) => (
-        <img key={idx} src={url} alt={`Past Work ${idx + 1}`} />
-      ))
-    ) : gallery && gallery.length > 0 ? (
-      gallery.map((url, i) => (
-        <img key={i} src={url} alt={`Work ${i + 1}`} />
-      ))
-    ) : (
-      <p>No gallery images.</p>
-    )}
-  </div>
-</section>
 
+      <section className="gallery-section">
+        <h2>Past Work</h2>
+        <div className="gallery img">
+          {pastWorkPhotoUrls && pastWorkPhotoUrls.length > 0 ? (
+            pastWorkPhotoUrls.map((url, idx) => (
+              <img key={idx} src={url} alt={`Past Work ${idx + 1}`} />
+            ))
+          ) : gallery && gallery.length > 0 ? (
+            gallery.map((url, i) => (
+              <img key={i} src={url} alt={`Work ${i + 1}`} />
+            ))
+          ) : (
+            <p>No gallery images.</p>
+          )}
+        </div>
+      </section>
 
       <h2>Weekly Availability</h2>
       <div className="availability-center">
-        <select className="availability-dropdown" aria-label="Select day to view availability">
-          {Object.entries(availability).map(([day, hours], i) => (
-            <option key={i} value={day}>{day}: {hours}</option>
-          ))}
+        <select className="availability-dropdown">
+          {available.length > 0 ? (
+            available.map((slot, i) => {
+              const label = formatRelativeTime(slot.day, slot.hour);
+              if (!label) return null;
+              return (
+                <option key={i} value={`${slot.day}-${slot.hour}`}>
+                  {label}
+                </option>
+              );
+            })
+          ) : (
+            <option disabled>No availability slots</option>
+          )}
         </select>
       </div>
     </div>

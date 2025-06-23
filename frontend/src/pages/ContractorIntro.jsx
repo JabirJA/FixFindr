@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/ContractorIntro.css';
-import logo from '../assets/logo.png';
 import logo2 from '../assets/preload.png';
 
 const ContractorIntro = () => {

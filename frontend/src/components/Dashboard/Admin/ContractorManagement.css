@@ -1,151 +1,238 @@
 .cm-container {
-    padding: 2rem;
-    font-family: Arial, sans-serif;
-  }
-  
-  .cm-filter-bar {
-    margin-bottom: 1rem;
-  }
-  
-  .cm-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-  }
-  
-  .cm-table th,
-  .cm-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-  }
-  
-  .cm-table th {
-    background-color: var(--footer-bg);
-    color: var(--input-text);
-  }
-  
-  /* Name buttons */
-  .cm-link-button {
-    background: none;
-    border: none;
-    color: var(--input-text);
-    cursor: pointer;
-    text-decoration: none;
-    padding: 0;
-    font-size: 17px;
-    transition: color 0.2s;
-  }
-  
-  .cm-link-button:hover {
-    color: var(--accent);
-    text-decoration: wavy;
-  }
-  
-  /* Status styling */
-  .cm-status {
-    padding: 4px 10px;
-    border-radius: 4px;
-    color: white;
-    font-weight: bold;
-    font-size: 0.9rem;
-    display: inline-block;
-  }
-  
-  .cm-status.pending {
-    background-color: orange;
-  }
-  
-  .cm-status.approved {
-    background-color: green;
-  }
-  
-  .cm-status.declined {
-    background-color: red;
-  }
-  
-  /* Modal */
-  .cm-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .cm-modal {
-    background: var(--footer-bg);
-    padding: 2rem;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-  }
-  
-  .cm-docs img {
-    max-width: 100%;
-    height: auto;
-    margin-top: 0.5rem;
-    border: 1px solid #ccc;
-  }
-  
-  .cm-samples {
-    display: flex;
-    gap: 10px;
-    margin-top: 0.5rem;
-    flex-wrap: wrap;
-  }
-  
-  .cm-modal-actions {
-    margin-top: 1.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  
-  .cm-approve {
-    background-color: #4caf50;
-    color: white;
-  }
-  
-  .cm-decline {
-    background-color: #f44336;
-    color: white;
-  }
-  
-  .cm-analytics {
-    background-color: #2196f3;
-    color: white;
-  }
-  
-  /* Make remove button red */
-  .cm-remove {
-    background-color: #d32f2f;
-    color: white;
-  }
-  
-  /* Center the close button */
-  .cm-close-btn {
-    margin: 2rem auto 0;
-    background-color: var(--accent);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    display: block;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  
-  .cm-close-btn:hover {
-    background-color: var(--input-text);
-    color: var(--footer-bg);
-  }
-  
+  padding: 2rem;
+  color: var(--input-text);
+}
+
+/* Filter bar */
+.cm-filter-bar {
+  margin-bottom: 1rem;
+}
+
+.cm-filter-bar select {
+  padding: 6px 12px;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Table styling */
+.cm-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cm-table th,
+.cm-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+}
+
+.cm-table th {
+  background-color: #333;
+  color: #fff;
+  font-weight: 600;
+}
+
+.cm-link-button {
+  background: none;
+  border: none;
+  color: var(--input-text);
+  cursor: pointer;
+  padding: 0;
+  font-size: 17px;
+}
+
+.cm-link-button:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+/* Status badge */
+.cm-status {
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.cm-status.pending {
+  background-color: #ff9800;
+}
+
+.cm-status.approved {
+  background-color: #4caf50;
+}
+
+.cm-status.declined {
+  background-color: #f44336;
+}
+
+/* Modal overlay */
+.cm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+/* Modal box */
+.cm-modal {
+  background: var(--input-bg);
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  width: 95%;
+  max-width: 1100px; /* wider modal */
+  max-height: 95vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.cm-modal h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #222;
+}
+
+.cm-modal p {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* Image styles */
+.cm-modal img {
+  width: 100px;
+  width: 50%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin: 0.5rem auto;
+  display: block;
+}
+
+.cm-samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 0.5rem;
+}
+
+/* Modal actions */
+.cm-modal-actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cm-approve,
+.cm-decline,
+.cm-remove,
+.cm-analytics {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.3s;
+}
+
+.cm-approve {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.cm-decline {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.cm-remove {
+  background-color: #d32f2f;
+  color: #fff;
+}
+
+.cm-analytics {
+  background-color: #2196f3;
+  color: #fff;
+}
+
+.cm-approve:hover {
+  background-color: #43a047;
+}
+
+.cm-decline:hover {
+  background-color: #e53935;
+}
+
+.cm-remove:hover {
+  background-color: #c62828;
+}
+
+.cm-analytics:hover {
+  background-color: #1976d2;
+}
+
+/* Close button */
+.cm-close-btn {
+  margin: 2rem auto 0;
+  background-color: #007BFF;
+  color: #fff;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 6px;
+  display: block;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.cm-close-btn:hover {
+  background-color: #0056b3;
+}
+.cm-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc; /* outer border */
+}
+
+.cm-details-table td {
+  padding: 8px 12px;
+  border: 1px solid #ccc;  /* vertical + horizontal lines */
+}
+
+.cm-details-table td:first-child {
+  font-weight: bold;
+  text-align: right;
+  width: 40%;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.cm-details-table td:last-child {
+  text-align: center;
+  color: var(--input-text);  /* or just #333 if var isn't defined */
+}
+.cm-modal h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: var(--input-text);
+}

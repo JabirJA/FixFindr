@@ -14,7 +14,6 @@ const RegisterPage = () => {
   const [phone, setPhone] = useState('');
   const [nin, setNIN] = useState('');
   const [age, setAge] = useState('');
-  const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -53,7 +52,6 @@ const RegisterPage = () => {
         phone,
         nin,
         age: Number(age),
-        city,
         state,
         // ...other contractor-specific fields or nulls
       }
@@ -198,15 +196,7 @@ const RegisterPage = () => {
         {role === 'contractor' && (
           <div className="contractor-fields">
             <div className="form-column">
-              <div className="form-group">
-                <label>City</label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                />
-              </div>
+    
               <div className="form-group">
                 <label>State</label>
                 <input

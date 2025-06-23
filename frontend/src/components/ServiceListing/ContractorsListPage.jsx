@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './ContractorsList.css';
 import logo from '../../assets/wom.png';
-
 import logo3 from '../../assets/mech2.png';
 import placeholder from '../../assets/placeholderImg.png';
 import SERVICES from '../../pages/services';
-
+import { getDistanceFromLatLonInKm, fetchCoordinates } from '../../utils/location';
+import { getProfilePhotoUrl} from '../../utils/images';
 const StarRating = ({ rating }) => {
   const stars = Math.floor(rating);
   return (
@@ -39,28 +39,62 @@ const ContractorsListPage = () => {
       try {
         const res = await fetch('http://localhost:5050/contractors');
         if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-
         const data = await res.json();
-        const enriched = data
-          .filter(c => c.verified) 
-          .map(c => {
-            const name = `${c.first_name || ''} ${c.last_name || ''}`.trim();
-            const image = c.profile_photo || (
-              c.service_type === 'Mechanic' ? logo3 :
-              (c.first_name && c.first_name.endsWith('a') ? logo : placeholder)
-            );
 
-            return {
-              ...c,
-              name: name || 'Unnamed Contractor',
-              image,
-              type: c.service_type || 'Unknown',
-              rating: c.star_rating || 0,
-              distance: c.distance || Math.floor(Math.random() * 20) + 1 // mock distance
-            };
-          });
+        if (!navigator.geolocation) {
+          console.warn("Geolocation not supported");
+          return;
+        }
 
-        setContractors(enriched);
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const userLat = position.coords.latitude;
+          const userLon = position.coords.longitude;
+
+          const enrichedPromises = data
+            .filter(c => c.verified)
+            .map(async (c) => {
+              const name = `${c.first_name || ''} ${c.last_name || ''}`.trim();
+              const image = c.profile_photo || (
+                c.service_type === 'Mechanic' ? logo3 :
+                (c.first_name && c.first_name.endsWith('a') ? logo : placeholder)
+              );
+
+              let contractorLat = c.location?.latitude;
+              let contractorLon = c.location?.longitude;
+
+              if (!contractorLat || !contractorLon) {
+                const locationStr = `${c.area}, ${c.lga}, ${c.state}, Nigeria`;
+                try {
+                  const coords = await fetchCoordinates(locationStr);
+                  contractorLat = coords.lat;
+                  contractorLon = coords.lng;
+                } catch (err) {
+                  console.warn(`Could not geocode ${name}`, err);
+                }
+              }
+
+              let distance = null;
+              if (contractorLat && contractorLon) {
+                distance = getDistanceFromLatLonInKm(userLat, userLon, contractorLat, contractorLon);
+              }
+
+              return {
+                ...c,
+                name: name || 'Unnamed Contractor',
+                image: getProfilePhotoUrl(c),
+                type: c.service_type || 'Unknown',
+                rating: c.star_rating || 0,
+                distance: distance ? distance.toFixed(2) : null
+              };
+            });
+
+          const enriched = await Promise.all(enrichedPromises);
+          setContractors(enriched);
+
+        }, (err) => {
+          console.error("Geolocation error:", err);
+        });
+
       } catch (error) {
         console.error('Error fetching contractors:', error);
       } finally {
@@ -74,11 +108,11 @@ const ContractorsListPage = () => {
   const filteredContractors = contractors
     .filter(c =>
       c.rating >= minRating &&
-      c.distance <= maxDistance &&
+      (c.distance === null || c.distance <= maxDistance) &&
       (typeFilter === 'All' || c.type.toLowerCase() === typeFilter.toLowerCase())
     )
     .sort((a, b) => {
-      if (sortBy === 'distance') return a.distance - b.distance;
+      if (sortBy === 'distance') return (a.distance || Infinity) - (b.distance || Infinity);
       if (sortBy === 'rating') return b.rating - a.rating;
       return 0;
     });
@@ -148,7 +182,7 @@ const ContractorsListPage = () => {
                 </h2>
                 <p className="type">{contractor.type || 'Unknown Type'}</p>
                 <StarRating rating={contractor.rating || 0} />
-                <p>{contractor.distance || '?'} km away</p>
+                <p>{contractor.distance ? `${contractor.distance} km away` : 'Distance unknown'}</p>
               </div>
             </div>
           ))

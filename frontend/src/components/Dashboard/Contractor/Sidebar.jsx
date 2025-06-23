@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
-import logo from '../../../assets/placeholderImg.png';
 import { useNavigate } from 'react-router-dom';
 import { handleSignOut } from '../../../utils/functions';
 import { getProfilePhotoUrl} from '../../../utils/images';

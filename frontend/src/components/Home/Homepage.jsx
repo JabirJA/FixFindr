@@ -28,7 +28,7 @@ const services = [
 
 const Homepage = () => {
   const [suggestions, setSuggestions] = useState([]);
-const [isSearching, setIsSearching] = useState(false);
+const [isSearching] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();

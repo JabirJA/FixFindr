@@ -53,6 +53,7 @@
   background: var(--bg);
   padding: 15px;
   border-radius: var(--accent);
+  margin-top: 8rem;
   margin-bottom: 20px;
   text-align: left;
 }
@@ -198,7 +199,7 @@
 
 .schedule-dropdown label {
   font-weight: 600;
-  color: var(--text-dark);
+  color: var(--input-text);
   display: block;
   margin-bottom: 6px;
 }
@@ -304,10 +305,8 @@
   background-color: var(--primary-light, #0056b3);
 }
 
-.map-iframe {
-  width: 100%;
-  border: 1px solid #ccc;
-}
+
+
 .checkout-breakdown {
   text-align: left;
   margin-bottom: 24px;
@@ -424,4 +423,53 @@
     font-size: 0.9rem;
     padding: 0.5rem 1rem;
   }
+}
+.map-section {
+  margin: 2rem 0; /* vertical space between this and other sections */
+  padding: 1rem;
+  background-color: var(--section-bg, #f9f9f9);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.map-section h3 {
+  margin-bottom: 0.5rem; /* tighter spacing under heading */
+  color: var(--primary-color, #333);
+  font-size: 1.4rem;
+}
+
+.map-section p {
+  margin-bottom: 0.5rem; /* less space below p */
+  color: var(--text-color, #555);
+  font-size: 0.95rem;
+}
+
+.map-section button {
+  background-color: var(--primary-color, #0077cc);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.map-section button:hover {
+  background-color: var(--primary-color-dark, #005fa3);
+  transform: translateY(-2px);
+}
+
+.map-section button:active {
+  transform: translateY(0);
+}
+
+#map {
+  height: 300px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-top: 0.5rem;
+  
 }

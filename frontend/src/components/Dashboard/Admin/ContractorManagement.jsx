@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ContractorManagement.css';
+import { getProfilePhotoUrl, getPastWorkPhotoUrls } from '../../../utils/images';
 
 function ContractorManagement() {
   const [contractors, setContractors] = useState([]);
@@ -52,11 +53,11 @@ function ContractorManagement() {
       const res = await fetch(`http://localhost:5050/contractors/${id}`, {
         method: 'DELETE',
       });
-  
+
       if (res.ok) {
         alert('Contractor removed successfully');
         setContractors(prev => prev.filter(c => c.contractor_id !== id));
-        setSelectedContractor(null); // Optional: reset selection if applicable
+        setSelectedContractor(null);
       } else {
         const data = await res.json();
         alert(data.error || data.message || 'Removal failed');
@@ -66,7 +67,6 @@ function ContractorManagement() {
       alert('Server error removing contractor');
     }
   };
-  
 
   const filteredContractors = contractors.filter(c => {
     if (filterStatus === 'All') return true;
@@ -129,19 +129,152 @@ function ContractorManagement() {
       </table>
 
       {selectedContractor && (
-        <div className="cm-modal-overlay" onClick={() => setSelectedContractor(null)}>
-          <div className="cm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Manage {selectedContractor.first_name} {selectedContractor.last_name}</h3>
-            
-            <p><strong>Email:</strong> {selectedContractor.email}</p>
-            <p><strong>Phone:</strong> {selectedContractor.phone_number}</p>
-            <p><strong>Transport:</strong> {selectedContractor.means_of_transport}</p>
-            <p><strong>Address:</strong> {selectedContractor.residential_address}</p>
-            <p><strong>State:</strong> {selectedContractor.state}</p>
-            <p><strong>LGA:</strong> {selectedContractor.lga}</p>
-            <p><strong>Verified:</strong> {selectedContractor.verified ? 'Yes' : 'No'}</p>
+        <div
+          className="cm-modal-overlay"
+          onClick={() => setSelectedContractor(null)}
+        >
+           <div
+            className="cm-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ textAlign: 'center' }}>
+              {selectedContractor.first_name} {selectedContractor.last_name}
+            </h3>
 
-            <div className="cm-modal-actions">
+            <table className="cm-details-table">
+              <tbody>
+                {/* Basic Info */}
+                <tr>
+                  <td><strong>Contractor ID:</strong></td>
+                  <td>{selectedContractor.contractor_id}</td>
+                </tr>
+                <tr>
+                  <td><strong>User ID:</strong></td>
+                  <td>{selectedContractor.user_id}</td>
+                </tr>
+                <tr>
+                  <td><strong>Service Type:</strong></td>
+                  <td>{selectedContractor.service_type}</td>
+                </tr>
+                <tr>
+                  <td><strong>Star Rating:</strong></td>
+                  <td>{selectedContractor.star_rating ?? 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td><strong>Experience:</strong></td>
+                  <td>{selectedContractor.experience} years</td>
+                </tr>
+
+                {/* Contact Info */}
+                <tr>
+                  <td><strong>Phone Number:</strong></td>
+                  <td>{selectedContractor.phone_number}</td>
+                </tr>
+                <tr>
+                  <td><strong>State:</strong></td>
+                  <td>{selectedContractor.state}</td>
+                </tr>
+                <tr>
+                  <td><strong>LGA:</strong></td>
+                  <td>{selectedContractor.lga || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td><strong>Area:</strong></td>
+                  <td>{selectedContractor.area || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td><strong>Residential Address:</strong></td>
+                  <td>{selectedContractor.residential_address || 'N/A'}</td>
+                </tr>
+
+                {/* Personal Info */}
+                <tr>
+                  <td><strong>Age:</strong></td>
+                  <td>{selectedContractor.age}</td>
+                </tr>
+                <tr>
+                  <td><strong>NIN:</strong></td>
+                  <td>{selectedContractor.nin || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td><strong>BVN:</strong></td>
+                  <td>{selectedContractor.bvn || 'N/A'}</td>
+                </tr>
+
+                {/* Additional Info */}
+                <tr>
+                  <td><strong>Languages:</strong></td>
+                  <td>{selectedContractor.languages && selectedContractor.languages.length > 0
+                    ? selectedContractor.languages.join(', ')
+                    : 'N/A'}
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Means of Transport:</strong></td>
+                  <td>{selectedContractor.means_of_transport || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td><strong>Bio:</strong></td>
+                  <td>{selectedContractor.bio || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td><strong>Created At:</strong></td>
+                  <td>{selectedContractor.created_at}</td>
+                </tr>
+                <tr>
+                  <td><strong>Trade Certificate:</strong></td>
+                  <td>{selectedContractor.trade_certificate || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td><strong>Reference Files:</strong></td>
+                  <td>{selectedContractor.reference_files && selectedContractor.reference_files.length > 0
+                    ? selectedContractor.reference_files.join(', ')
+                    : 'N/A'}
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Vehicle Proof:</strong></td>
+                  <td>{selectedContractor.vehicle_proof || 'N/A'}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Leave images as-is */}
+            <p><strong>Profile Photo:</strong></p>
+            <img
+              src={getProfilePhotoUrl(selectedContractor)}
+              alt="Profile"
+            />
+
+            <p><strong>Government ID Photo:</strong></p>
+            {selectedContractor.government_id_photo ? (
+              <img
+                src={`http://localhost:5050/${selectedContractor.government_id_photo}`}
+                alt="Government ID"
+              />
+            ) : <p>N/A</p>}
+
+            <p><strong>Past Work Photos:</strong></p>
+            {getPastWorkPhotoUrls(selectedContractor).length > 0 ? (
+              getPastWorkPhotoUrls(selectedContractor).map((url, idx) => (
+                <img
+                  key={idx}
+                  src={url}
+                  alt={`Work ${idx + 1}`}
+                />
+              ))
+            ) : <p>N/A</p>}
+        
+
+             <p><strong>Trade Certificate:</strong> {selectedContractor.trade_certificate || 'N/A'}</p>
+
+            <p><strong>Reference Files:</strong> {selectedContractor.reference_files && selectedContractor.reference_files.length > 0
+              ? selectedContractor.reference_files.join(', ')
+              : 'N/A'}
+            </p>
+            <p><strong>Vehicle Proof:</strong> {selectedContractor.vehicle_proof || 'N/A'}</p>
+
+            <div className="cm-modal-actions" style={{ marginTop: '20px' }}>
               {!selectedContractor.verified && (
                 <button
                   className="cm-approve"
