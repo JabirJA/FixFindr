@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './DashboardHome.css';
 import logo2 from '../../../assets/logo2.png';
 
 const DashboardHome = () => {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionFeedback, setCompletionFeedback] = useState('');
+  const [jobCompleted, setJobCompleted] = useState(false);
+  const [modalJob, setModalJob] = useState(null);
+  const [chatMessages, setChatMessages] = useState([
+    { from: 'Client', text: 'Please don’t be late.' },
+    { from: 'You', text: 'Already en route.' },
+  ]);
+  const [chatInput, setChatInput] = useState('');
+
+  const [currentBooking, setCurrentBooking] = useState(null);
   const [pendingJobs, setPendingJobs] = useState([
     {
       id: 3,
@@ -39,46 +48,52 @@ const DashboardHome = () => {
     },
   ]);
 
-  const [currentBooking, setCurrentBooking] = useState({
-    id: 'abc123',
-    contractorName: 'John Doe',
-    serviceType: 'Mechanic',
-    contractorPhone: '555-123-4567',
-    price: 150,
-    status: 'Ongoing',
-    imageUrl: logo2,
-    location: {
-      address: '123 Main St, Abuja, Nigeria',
-      mapEmbedUrl:
-        'https://maps.google.com/maps?q=abuja&t=&z=13&ie=UTF8&iwloc=&output=embed',
-    },
-    startTime: '2025-05-20 10:00 AM',
-  });
+  // ⬇️ Load current booking from localStorage if available
+  useEffect(() => {
+    const stored = localStorage.getItem('bookingContext');
+    if (stored) {
+      try {
+        const { booking, contractor, userCoords } = JSON.parse(stored);
+        if (!booking || !contractor) return;
 
-  const [jobCompleted, setJobCompleted] = useState(false);
-  const [modalJob, setModalJob] = useState(null);
-  const [chatMessages, setChatMessages] = useState([
-    { from: 'Client', text: 'Please don’t be late.' },
-    { from: 'You', text: 'Already en route.' },
-  ]);
-  const [chatInput, setChatInput] = useState('');
+        const mapUrl = contractor.latitude && contractor.longitude && userCoords
+          ? `https://www.google.com/maps/embed/v1/directions?key=YOUR_GOOGLE_MAPS_API_KEY&origin=${userCoords[0]},${userCoords[1]}&destination=${contractor.latitude},${contractor.longitude}`
+          : 'https://maps.google.com/maps';
 
-  // Accept pending job -> move to upcoming
+        setCurrentBooking({
+          id: booking.booking_id,
+          contractorName: contractor.name,
+          serviceType: contractor.service_type || 'Unknown',
+          contractorPhone: contractor.phone_number || 'N/A',
+          price: booking.total_amount || 0,
+          status: booking.status || 'Pending',
+          imageUrl: logo2,
+          location: {
+            address: booking.full_address || 'Unknown address',
+            mapEmbedUrl: mapUrl,
+          },
+          startTime: new Date(booking.booking_date).toLocaleString(),
+        });
+      } catch (err) {
+        console.error('Error parsing bookingContext:', err);
+      }
+    }
+  }, []);
+
   const handleAccept = (jobId) => {
-    const jobToAccept = pendingJobs.find((job) => job.id === jobId);
-    if (jobToAccept) {
-      setUpcomingJobs((prev) => [...prev, jobToAccept]);
-      setPendingJobs((prev) => prev.filter((job) => job.id !== jobId));
+    const job = pendingJobs.find((j) => j.id === jobId);
+    if (job) {
+      setUpcomingJobs((prev) => [...prev, job]);
+      setPendingJobs((prev) => prev.filter((j) => j.id !== jobId));
     }
   };
 
-  // Reject pending job -> remove
   const handleReject = (jobId) => {
-    setPendingJobs((prev) => prev.filter((job) => job.id !== jobId));
+    setPendingJobs((prev) => prev.filter((j) => j.id !== jobId));
   };
 
-  // Start an upcoming job as current job
   const startJob = (job) => {
+    const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(job.location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
     setCurrentBooking({
       id: job.id,
       contractorName: job.client,
@@ -89,10 +104,7 @@ const DashboardHome = () => {
       imageUrl: logo2,
       location: {
         address: job.location,
-        mapEmbedUrl:
-          'https://maps.google.com/maps?q=' +
-          encodeURIComponent(job.location) +
-          '&t=&z=13&ie=UTF8&iwloc=&output=embed',
+        mapEmbedUrl: mapUrl,
       },
       startTime: new Date(job.date).toLocaleString(),
     });
@@ -105,40 +117,40 @@ const DashboardHome = () => {
     ]);
     setChatInput('');
   };
+
   const getAreaFromLocation = (location) => {
-    // Split by comma and trim spaces
     const parts = location.split(',');
     return parts.length > 1 ? parts[parts.length - 1].trim() : location;
   };
-  
+
   const getTimeRemaining = (dateStr) => {
     const jobDate = new Date(dateStr);
     const now = new Date();
-    const diffMs = jobDate - now;
+    const diff = jobDate - now;
+    if (diff <= 0) return 'Starting soon';
 
-    if (diffMs <= 0) return 'Starting soon';
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
+    const mins = Math.floor(diff / 60000);
+    const hours = Math.floor(mins / 60);
+    const days = Math.floor(hours / 24);
 
-    if (diffMins < 60) return `in ${diffMins} minute${diffMins > 1 ? 's' : ''}`;
-    if (diffHours < 24) return `in ${diffHours} hour${diffHours > 1 ? 's' : ''}`;
-    return `in ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+    if (mins < 60) return `in ${mins} minute${mins !== 1 ? 's' : ''}`;
+    if (hours < 24) return `in ${hours} hour${hours !== 1 ? 's' : ''}`;
+    return `in ${days} day${days !== 1 ? 's' : ''}`;
   };
 
   const sendMessage = () => {
-    if (chatInput.trim() === '') return;
-    setChatMessages((prev) => [...prev, { from: 'You', text: chatInput }]);
-    setChatInput('');
+    if (chatInput.trim()) {
+      setChatMessages((prev) => [...prev, { from: 'You', text: chatInput }]);
+      setChatInput('');
+    }
   };
 
   return (
     <div className="dashboard-container-row">
-
       {/* Current Job */}
       <section className="section current-job">
         <h2>Current Job</h2>
-        {!jobCompleted ? (
+        {!jobCompleted && currentBooking ? (
           <>
             <p><strong>Service:</strong> {currentBooking.serviceType}</p>
             <p><strong>Client:</strong> {currentBooking.contractorName}</p>
@@ -146,45 +158,31 @@ const DashboardHome = () => {
             <p><strong>Start Time:</strong> {currentBooking.startTime}</p>
             <p><strong>Price:</strong> ₦{currentBooking.price}</p>
             <p><strong>Status:</strong> {currentBooking.status}</p>
-          </>
-        ) : (
-          <p>No current job at the moment.</p>
-        )}
 
-        {!jobCompleted && (
-          <div className="chat-section">
-            <h3>Current Chat</h3>
-            <div
-              className="chat-box"
-              style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #ccc', padding: '8px' }}
-            >
-              {chatMessages.map((msg, idx) => (
-                <p key={idx}><strong>{msg.from}:</strong> {msg.text}</p>
-              ))}
-            </div>
-            <div style={{ marginTop: '0.5rem', display: 'flex' }}>
+            <div className="chat-section">
+              <h3>Current Chat</h3>
+              <div className="chat-box">
+                {chatMessages.map((msg, i) => (
+                  <p key={i}><strong>{msg.from}:</strong> {msg.text}</p>
+                ))}
+              </div>
               <input
                 placeholder="Type a message..."
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
-                style={{ flexGrow: 1, marginRight: '0.5rem' }}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               />
               <button onClick={sendMessage}>Send</button>
+              <button onClick={() => setShowCompletionModal(true)}>Mark as Complete</button>
             </div>
-            <button
-              onClick={() => setShowCompletionModal(true)}
-              className="complete-btn"
-              style={{ marginTop: '1rem' }}
-            >
-              Mark as Complete
-            </button>
-          </div>
+          </>
+        ) : (
+          <p>No current job at the moment.</p>
         )}
       </section>
 
       {/* Location */}
-      {!jobCompleted && (
+      {!jobCompleted && currentBooking && (
         <section className="section map-section">
           <h2>Location</h2>
           <p>{currentBooking.location.address}</p>
@@ -200,34 +198,29 @@ const DashboardHome = () => {
         </section>
       )}
 
-  {/* Pending Jobs */}
-<section className="section pending-jobs">
-  <h2>Pending Jobs</h2>
-  {pendingJobs.length === 0 ? (
-    <p>No pending jobs.</p>
-  ) : (
-    <ul>
-      {pendingJobs.map((job) => (
-        <li key={job.id} className="job-item">
-          <div>
-            <strong>{job.client}</strong> - {job.description}
-            <br />
-            <small>
-              {getTimeRemaining(job.date)} • {getAreaFromLocation(job.location)}
-            </small>
-          </div>
-          <div style={{ marginTop: '5px' }}>
-            <button onClick={() => handleAccept(job.id)} style={{ marginRight: '0.5rem' }}>
-              Accept
-            </button>
-            <button onClick={() => handleReject(job.id)}>Reject</button>
-          </div>
-        </li>
-      ))}
-    </ul>
-  )}
-</section>
-
+      {/* Pending Jobs */}
+      <section className="section pending-jobs">
+        <h2>Pending Jobs</h2>
+        {pendingJobs.length === 0 ? (
+          <p>No pending jobs.</p>
+        ) : (
+          <ul>
+            {pendingJobs.map((job) => (
+              <li key={job.id} className="job-item">
+                <div>
+                  <strong>{job.client}</strong> - {job.description}
+                  <br />
+                  <small>{getTimeRemaining(job.date)} • {getAreaFromLocation(job.location)}</small>
+                </div>
+                <div>
+                  <button onClick={() => handleAccept(job.id)}>Accept</button>
+                  <button onClick={() => handleReject(job.id)}>Reject</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {/* Upcoming Jobs */}
       <section className="section upcoming-jobs">
@@ -241,16 +234,14 @@ const DashboardHome = () => {
                 <div>
                   <strong>{job.client}</strong> – {getTimeRemaining(job.date)}
                 </div>
-                <button onClick={() => setModalJob(job)} style={{ marginTop: '5px' }}>
-                  View Details
-                </button>
+                <button onClick={() => setModalJob(job)}>View Details</button>
               </li>
             ))}
           </ul>
         )}
       </section>
 
-      {/* View Details Modal */}
+      {/* Modal for Job Details */}
       {modalJob && (
         <div className="modal-overlay" onClick={() => setModalJob(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -259,20 +250,8 @@ const DashboardHome = () => {
             <p><strong>Date:</strong> {new Date(modalJob.date).toLocaleString()}</p>
             <p><strong>Description:</strong> {modalJob.description}</p>
             <p><strong>Location:</strong> {modalJob.location}</p>
-
-            <div style={{ marginTop: '1rem' }}>
-              <button
-                onClick={() => alert('Open chat with client')}
-                style={{ marginRight: '0.5rem' }}
-              >
-                Chat
-              </button>
-              <button
-                onClick={() => startJob(modalJob)}
-                style={{ marginRight: '0.5rem' }}
-              >
-                Start Job
-              </button>
+            <div>
+              <button onClick={() => startJob(modalJob)}>Start Job</button>
               <button onClick={() => setModalJob(null)}>Close</button>
             </div>
           </div>
@@ -285,11 +264,9 @@ const DashboardHome = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Complete Job Feedback</h3>
             <textarea
-              placeholder="Leave feedback or notes about the job..."
+              placeholder="Leave feedback..."
               value={completionFeedback}
               onChange={(e) => setCompletionFeedback(e.target.value)}
-              rows={5}
-              style={{ width: '100%', marginBottom: '1rem' }}
             />
             <div>
               <button
@@ -301,7 +278,6 @@ const DashboardHome = () => {
                   setJobCompleted(true);
                   setCurrentBooking((prev) => ({ ...prev, status: 'Completed' }));
                 }}
-                style={{ marginRight: '0.5rem' }}
               >
                 Submit
               </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './Checkout.css';
 import logo2 from '../../assets/man.png';
 import { handleShareLocation, isValidPhone } from '../../utils/location';
@@ -14,6 +14,7 @@ import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 const Checkout = () => {
   const location = useLocation();
   const contractor = location.state?.contractor;
+  const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
   const [bookingTime, setBookingTime] = useState('');
@@ -57,30 +58,44 @@ const Checkout = () => {
   ];
 
   const total = basePrice + serviceFee + (surcharges[bookingTime] || 0);
-
   useEffect(() => {
     const fetchUser = async () => {
       const profileToken = localStorage.getItem('profileToken');
-      if (!profileToken) return;
+      const userId = localStorage.getItem('userId');
+      if (!profileToken) {
+        console.warn('No profile token found');
+        return;
+      }
+  
       try {
-        const res = await fetch(`/user/dashboard/${profileToken}`);
-        if (!res.ok) throw new Error('Failed to fetch user');
+        const res = await fetch(`http://localhost:5050/user/dashboard/${profileToken}`);
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('Failed to fetch user:', errorText);
+          return;
+        }
+  
         const data = await res.json();
+  
         setUser({
           name: `${data.first_name} ${data.last_name}`,
           email: data.email,
           address: data.address,
-          phone: data.phone,
+          role: data.role,
+          gender: data.gender,
+          date_of_birth: data.date_of_birth,
+          user_id: userId, 
         });
+  
         setAddressInput(data.address || '');
-        setPhoneInput(data.phone || '');
       } catch (err) {
-        console.error(err);
+        console.error('Fetch error:', err);
       }
     };
+  
     fetchUser();
   }, []);
-
+  
   useEffect(() => {
     if (bookingTime === 'Scheduled' && contractor?.contractor_id) {
       axios.get(`http://localhost:5050/contractors/availability/${contractor.contractor_id}`)
@@ -184,19 +199,74 @@ const Checkout = () => {
       .catch(() => setTermsText('Unable to load terms.'));
     setShowTermsModal(true);
   };
-
-  const onSubmit = () => {
-    if (!isValidPhone(phoneInput)) {
-      alert('Please enter a valid Nigerian phone number');
+  const onSubmit = async () => {
+    const userId = localStorage.getItem('userId');
+  
+    if (!userId) {
+      alert('User ID not found. Please log in again.');
       return;
     }
-    if (!stateInput && !userCoords) {
-      alert('Please fill out State, Area, and Street Address or share location');
+  
+    if (!contractor || !contractor.contractor_id) {
+      alert('Contractor information is missing.');
       return;
     }
-    alert('Booking submitted!');
+  
+    if (!bookingTime) {
+      alert('Please select a booking type.');
+      return;
+    }
+  
+    if (bookingTime === 'Scheduled' && !scheduledDate) {
+      alert('Please choose a scheduled date.');
+      return;
+    }
+  
+    if (!userCoords && (!stateInput || !areaInput || !streetInput)) {
+      alert('Please either share your location or fill in all address fields.');
+      return;
+    }
+  
+    const fullAddress = `${streetInput}, ${areaInput}, ${stateInput}, Nigeria`;
+  
+    const bookingData = {
+      user_id: userId,
+      contractor_id: contractor.contractor_id,
+      booking_date: new Date().toISOString(),
+      booking_type: bookingTime,
+      scheduled_slot: bookingTime === 'Scheduled' ? scheduledDate : null,
+      total_amount: total,
+      user_lat: userCoords?.[0] || null,
+      user_lng: userCoords?.[1] || null,
+      service_state: stateInput || '',
+      service_area: areaInput || '',
+      street_address: streetInput || '',
+      full_address: fullAddress,
+      status: 'Pending'
+    };
+  
+    try {
+      console.log('Submitting booking:');
+    
+      const res = await axios.post('http://localhost:5050/bookings', bookingData);
+      const booking = res.data.booking;
+    
+      // Save full context
+      localStorage.setItem(
+        'bookingContext',
+        JSON.stringify({ booking, contractor, userCoords })
+      );
+    
+      alert('Payment successful!');
+      navigate('/dashboard/booking-confirmation');
+    } catch (err) {
+      console.error('Booking submission failed:', err);
+      alert(err.response?.data?.message || 'Something went wrong while booking.');
+    }
+    
   };
 
+  
   if (!contractor) {
     return <div className="checkout-container"><h2>Checkout</h2><p>No contractor selected.</p></div>;
   }
