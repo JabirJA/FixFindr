@@ -29,10 +29,7 @@ const StarsRating = ({ rating, onChange }) => {
 
 const BookingConfirmation = () => {
   const location = useLocation();
-  const bookingFromNav = location.state?.booking;
-  const contractorFromNav = location.state?.contractor;
-  const userCoords = location.state?.userCoords;
-
+ 
   const [currentBooking, setCurrentBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pastBookings, setPastBookings] = useState([]);
@@ -40,24 +37,23 @@ const BookingConfirmation = () => {
   const [completionRating, setCompletionRating] = useState(0);
   const [completionReview, setCompletionReview] = useState('');
   const [completionFeedback, setCompletionFeedback] = useState('');
+
   useEffect(() => {
-    const storedContext = localStorage.getItem('bookingContext');
-    const parsedContext = storedContext ? JSON.parse(storedContext) : null;
-  
-    const booking = location.state?.booking || parsedContext?.booking;
-    const contractor = location.state?.contractor || parsedContext?.contractor;
-    const userCoords = location.state?.userCoords || parsedContext?.userCoords;
-  
+    const storedContext = JSON.parse(localStorage.getItem('bookingContext'));
+    const booking = location.state?.booking || storedContext?.booking;
+    const contractor = location.state?.contractor || storedContext?.contractor;
+    const userCoords = location.state?.userCoords || storedContext?.userCoords;
+
     if (!booking?.booking_id) {
       setLoading(false);
       return;
     }
-  
+
     const fetchBooking = async () => {
       try {
         const res = await axios.get(`http://localhost:5050/bookings/${booking.booking_id}`);
         const updatedBooking = res.data.booking;
-  
+
         setCurrentBooking({
           id: updatedBooking.booking_id,
           contractorName: contractor?.name || 'Unnamed Contractor',
@@ -81,12 +77,42 @@ const BookingConfirmation = () => {
         setLoading(false);
       }
     };
-  
+
     fetchBooking();
   }, []);
+  const fetchPastBookings = async () => {
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        console.warn('⚠️ No valid user ID found for fetching bookings.');
+        return;
+      }
   
+      const url = `http://localhost:5050/bookings/user/${userId}?status=Completed`;
   
+      const res = await axios.get(url);
   
+      const completed = res.data.map(b => ({
+        id: b.booking_id,
+        contractorName: b.contractor_name || 'Unknown Contractor',
+        serviceType: b.contractor_service || '',
+        date: new Date(b.booking_date).toLocaleString(),
+        price: b.total_amount,
+        rating: b.rating_given || 0,
+        review: b.rating_note || '',
+      }));
+
+  
+      setPastBookings(completed);
+    } catch (err) {
+      console.error('❌ Error fetching past bookings:', err);
+    }
+  };
+  useEffect(() => {
+    fetchPastBookings();
+  }, []);
+  
+
   function generateMapEmbedUrl(userCoords, contractor) {
     if (userCoords && contractor?.latitude && contractor?.longitude) {
       return `https://www.google.com/maps/embed/v1/directions?key=YOUR_GOOGLE_MAPS_API_KEY&origin=${userCoords[0]},${userCoords[1]}&destination=${contractor.latitude},${contractor.longitude}`;
@@ -116,27 +142,16 @@ const BookingConfirmation = () => {
     }
   };
 
-  const handleCompleteBooking = () => {
-    setPastBookings(prev => [
-      {
-        id: currentBooking.id,
-        contractorName: currentBooking.contractorName,
-        serviceType: currentBooking.serviceType,
-        date: currentBooking.startTime,
-        price: currentBooking.price,
-        rating: completionRating,
-        review: completionReview,
-        feedback: completionFeedback,
-        saved: false
-      },
-      ...prev
-    ]);
+  const handleCompleteBooking = async () => {
+    // You can optionally POST review and rating to backend here
+    await fetchPastBookings(); // Refresh
     setCurrentBooking(null);
     setShowCompleteModal(false);
     setCompletionRating(0);
     setCompletionReview('');
     setCompletionFeedback('');
     localStorage.removeItem('bookingContext');
+    await axios.put(`http://localhost:5050/bookings/${currentBooking.id}/complete`);
 
   };
 
@@ -193,18 +208,6 @@ const BookingConfirmation = () => {
                 className="map-iframe"
                 style={{ width: '100%', border: 0 }}
               ></iframe>
-            </section>
-
-            <section className="chat-section">
-              <h3>Current Chat</h3>
-              <div className="chat-box">
-                <p><strong>{currentBooking.contractorName}:</strong> Please arrive by the agreed time.</p>
-                <p><strong>You:</strong> Sure! I’m on my way now.</p>
-                <input type="text" placeholder="Type a message..." />
-              </div>
-              <button className="call-button" onClick={() => window.open(`tel:${currentBooking.contractorPhone}`)}>
-                Call Contractor
-              </button>
             </section>
           </div>
         </div>

@@ -39,7 +39,7 @@ const UserDashboard = () => {
       case 'profile':
         return <UserProfile user={user} />;
       case 'bookings':
-        return <BookingConfirmations />;
+        return <BookingConfirmations user={user}/>;
       case 'security':
         return <SecuritySettings user={user} />;
       case 'help':
