@@ -559,12 +559,12 @@
   
   /* Service type */
   .service-type {
-    font-size: 1.3rem;
+    font-size: 1rem;
     color: #555;
     font-style: normal;
     margin-top: -3px;
     display: block;
-    text-align: center;
+    text-align: left;
   }
   
   /* Past Bookings */

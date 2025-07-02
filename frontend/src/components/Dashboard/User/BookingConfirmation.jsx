@@ -29,7 +29,7 @@ const StarsRating = ({ rating, onChange }) => {
 
 const BookingConfirmation = () => {
   const location = useLocation();
- 
+  
   const [currentBooking, setCurrentBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pastBookings, setPastBookings] = useState([]);
@@ -83,12 +83,15 @@ const BookingConfirmation = () => {
   const fetchPastBookings = async () => {
     try {
       const userId = localStorage.getItem('userId');
+      console.log('📦 Fetched userId from localStorage:', userId);
+  
       if (!userId) {
         console.warn('⚠️ No valid user ID found for fetching bookings.');
         return;
       }
   
       const url = `http://localhost:5050/bookings/user/${userId}?status=Completed`;
+
   
       const res = await axios.get(url);
   

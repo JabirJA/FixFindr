@@ -5,6 +5,25 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
+
+
+// GET all contractors
+router.get('/', async (req, res) => {
+
+  try {
+    const result = await pool.query(
+      `SELECT c.*, u.first_name, u.last_name
+       FROM contractors c
+       JOIN users u ON c.user_id = u.user_id`
+    );
+  
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching contractors:', err);
+    res.status(500).send('Server error');
+  }
+});
+
 // Multer setup
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -153,8 +172,6 @@ router.post('/submit-kyc', upload.fields([
   }
 });
 
-
-
 // GET contractor dashboard by profileToken
 router.get('/dashboard/:profileToken', async (req, res) => {
   try {
@@ -179,20 +196,6 @@ router.get('/dashboard/:profileToken', async (req, res) => {
   }
 });
 
-// GET all contractors
-router.get('/', async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT c.*, u.first_name, u.last_name
-       FROM contractors c
-       JOIN users u ON c.user_id = u.user_id`
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error fetching contractors:', err);
-    res.status(500).send('Server error');
-  }
-});
 
 // GET contractor by ID
 router.get('/:id', async (req, res) => {
@@ -228,7 +231,7 @@ router.put('/:id', async (req, res) => {
   }
 
   const fields = [
-    'service_type', 'state', 'age', 'nin', 'trade_certificate',
+    'service_type', 'city', 'state', 'age', 'nin', 'trade_certificate',
     'government_id_photo', 'past_work_photos', 'languages',
     'experience', 'profile_photo', 'means_of_transport', 'bvn',
     'residential_address', 'lga', 'phone_number'
