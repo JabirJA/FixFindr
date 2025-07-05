@@ -1,6 +1,7 @@
 
 import './Footer.css'; // Make sure you create this or update the path if needed
-import logo2 from '../../assets/preload2.png'; // Adjust path if logo.png is elsewhere
+import lightLogo from '../../assets/preload2.png'; 
+import darkLogo from '../../assets/foot_dark.png'; 
 import { Link } from 'react-router-dom';
 import React, { useContext} from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa';
@@ -14,7 +15,12 @@ const Footer = () => {
     <footer className="footer-extended">
       <div className="footer-container">
         <div className="footer-logo">
-        <img src={logo2} alt="Contractor Finder Logo" className="fixfinder-logo" />
+        <img
+        src={theme === 'dark' ? darkLogo : lightLogo}
+        alt="Contractor Finder Logo"
+        className="fixfinder-logo"
+      />
+
 
           <p>Your trusted local contractor finder.</p>
         </div>

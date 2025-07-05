@@ -103,7 +103,7 @@ function AppWrapper() {
   );
 
   return (
-    <>
+    <div className="app-layout">
       <Navbar />
       <div className="main-content">
         <Routes>
@@ -155,7 +155,7 @@ function AppWrapper() {
       </div>
 
       {!shouldHideFooter && <Footer />}
-    </>
+    </div>
   );
 }
 
