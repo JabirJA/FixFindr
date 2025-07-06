@@ -145,17 +145,28 @@ const BookingConfirmation = () => {
   };
 
   const handleCompleteBooking = async () => {
-    // You can optionally POST review and rating to backend here
-    await fetchPastBookings(); // Refresh
-    setCurrentBooking(null);
-    setShowCompleteModal(false);
-    setCompletionRating(0);
-    setCompletionReview('');
-    setCompletionFeedback('');
-    localStorage.removeItem('bookingContext');
-    await axios.put(`http://localhost:5050/bookings/${currentBooking.id}/complete`);
-
+    try {
+      // Send rating and note to backend before marking complete
+      await axios.put(`http://localhost:5050/bookings/${currentBooking.id}/complete`, {
+        rating_given: completionRating,
+        rating_note: completionReview,
+        feedback: completionFeedback // Optional: only if you're storing general feedback separately
+      });
+  
+      // Refresh past bookings and clear current
+      await fetchPastBookings();
+      setCurrentBooking(null);
+      setShowCompleteModal(false);
+      setCompletionRating(0);
+      setCompletionReview('');
+      setCompletionFeedback('');
+      localStorage.removeItem('bookingContext');
+    } catch (error) {
+      console.error("❌ Error completing booking:", error);
+      alert("Failed to complete the booking. Please try again.");
+    }
   };
+  
 
   if (loading) return <p>Loading booking confirmation...</p>;
 

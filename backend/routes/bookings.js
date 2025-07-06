@@ -218,7 +218,7 @@ router.get('/', async (req, res) => {
           b.completed_at,
           b.rating_given,
           b.rating_note,
-          b.notes,
+          b.feedback,
           (u.first_name || ' ' || u.last_name) AS user_name,
           c.service_type AS contractor_service,
           c.contractor_id,
@@ -237,19 +237,28 @@ router.get('/', async (req, res) => {
       res.status(500).json({ error: 'Server error' });
     }
   });
-  // PUT /bookings/:id/complete
+// PUT /bookings/:id/complete
 router.put('/:id/complete', async (req, res) => {
     const { id } = req.params;
+    const { rating_given, rating_note } = req.body;
+  
     try {
       await pool.query(
-        `UPDATE bookings SET status = 'Completed', completed_at = CURRENT_TIMESTAMP WHERE booking_id = $1`,
-        [id]
+        `UPDATE bookings
+         SET status = 'Completed',
+             completed_at = CURRENT_TIMESTAMP,
+             rating_given = $1,
+             rating_note = $2
+         WHERE booking_id = $3`,
+        [rating_given || null, rating_note || null, id]
       );
-      res.json({ message: 'Booking marked as completed.' });
+  
+      res.json({ message: 'Booking marked as completed and review saved.' });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Server error' });
     }
   });
+  
   
 module.exports = router;

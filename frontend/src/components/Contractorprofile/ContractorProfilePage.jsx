@@ -115,7 +115,7 @@ const ContractorProfilePage = () => {
                 longitude: contractorLon
               },
               latitude: contractorLat,
-              longitude: contractorLon,
+              longitude: contractorLon
             };
           
             setContractor(enrichedContractor);
