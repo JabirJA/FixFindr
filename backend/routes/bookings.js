@@ -237,28 +237,39 @@ router.get('/', async (req, res) => {
       res.status(500).json({ error: 'Server error' });
     }
   });
-// PUT /bookings/:id/complete
-router.put('/:id/complete', async (req, res) => {
+  router.put('/:id/complete', async (req, res) => {
     const { id } = req.params;
-    const { rating_given, rating_note } = req.body;
+    const { rating_given, rating_note, feedback } = req.body;
+  
+    const ratingGiven = rating_given ? Number(rating_given) : null;
+    const ratingNote = typeof rating_note === 'string' ? rating_note : null;
+    const feedbackNote = typeof feedback === 'string' ? feedback : null;
   
     try {
+      // Optional: Check if booking exists
+      const check = await pool.query(`SELECT booking_id FROM bookings WHERE booking_id = $1`, [id]);
+      if (check.rowCount === 0) {
+        return res.status(404).json({ error: 'Booking not found.' });
+      }
+  
       await pool.query(
         `UPDATE bookings
          SET status = 'Completed',
              completed_at = CURRENT_TIMESTAMP,
              rating_given = $1,
-             rating_note = $2
-         WHERE booking_id = $3`,
-        [rating_given || null, rating_note || null, id]
+             rating_note = $2,
+             feedback = $3
+         WHERE booking_id = $4`,
+        [ratingGiven, ratingNote, feedbackNote, id]
       );
   
       res.json({ message: 'Booking marked as completed and review saved.' });
     } catch (err) {
-      console.error(err);
+      console.error('❌ Error updating booking:', err);
       res.status(500).json({ error: 'Server error' });
     }
   });
+  
   
   
 module.exports = router;

@@ -8,6 +8,7 @@ const contractorRoutes = require('./routes/contractors');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const bookingRoutes = require('./routes/bookings');
+const reviewRoutes = require('./routes/reviews'); // Add this at the top
 
 const app = express();
 const PORT = process.env.PORT || 5050;
@@ -25,6 +26,7 @@ app.use('/user', userRoutes);
 app.use('/admin', adminRoutes);
 app.use('/uploads', express.static('uploads'));
 app.use('/bookings', bookingRoutes);
+app.use('/reviews', reviewRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found' });
